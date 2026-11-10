@@ -66,20 +66,20 @@
 | 评价汇总 | GET | `/api/products/{id}/reviews/summary` | — | `{avg, goodRate, total}` |
 | 收藏 / 取消收藏 | POST | `/api/favorites/{productId}/toggle` | — | `{favorited: bool}` |
 | 我的收藏 | GET | `/api/favorites` | — | `List<Product>` |
-| 加入购物车 | POST | `/api/cart/items` | `{productId, spec, quantity}` | `Cart` |
+| 加入购物车 | POST | `/api/cart/items` | `{productId, spec, quantity}` | `CartService` |
 | 立即购买 | — | 直接走 `POST /api/orders` | 见 2.4 | — |
 
 ### 2.3 购物车（CartDrawer）
 
 | 前端动作 | 方法 | 路径 | 请求 | 返回 |
 |---|---|---|---|---|
-| 购物车列表 | GET | `/api/cart` | — | `Cart` |
-| 加入购物车 | POST | `/api/cart/items` | `{productId, spec, quantity}` | `Cart` |
-| 修改数量 | PUT | `/api/cart/items/{itemId}` | `{quantity}` | `Cart` |
-| 勾选 / 取消勾选 | PUT | `/api/cart/items/{itemId}/selected` | `{selected}` | `Cart` |
-| 全选 / 取消全选 | PUT | `/api/cart/selected` | `{selected}` | `Cart` |
-| 删除一件 | DELETE | `/api/cart/items/{itemId}` | — | `Cart` |
-| 删除选中 | DELETE | `/api/cart/selected` | — | `Cart` |
+| 购物车列表 | GET | `/api/cart` | — | `CartService` |
+| 加入购物车 | POST | `/api/cart/items` | `{productId, spec, quantity}` | `CartService` |
+| 修改数量 | PUT | `/api/cart/items/{itemId}` | `{quantity}` | `CartService` |
+| 勾选 / 取消勾选 | PUT | `/api/cart/items/{itemId}/selected` | `{selected}` | `CartService` |
+| 全选 / 取消全选 | PUT | `/api/cart/selected` | `{selected}` | `CartService` |
+| 删除一件 | DELETE | `/api/cart/items/{itemId}` | — | `CartService` |
+| 删除选中 | DELETE | `/api/cart/selected` | — | `CartService` |
 | 购物车数量角标 | GET | `/api/cart/count` | — | `{count}` |
 
 **Cart 返回结构**（前端已经按这个形状用）：
@@ -103,7 +103,7 @@
 | 前端动作 | 方法 | 路径 | 请求 | 返回 |
 |---|---|---|---|---|
 | 地址列表 | GET | `/api/addresses` | — | `List<Address>` |
-| 新增地址 | POST | `/api/addresses` | `{name, phone, region, detail, isDefault}` | `Address` |
+| 新增地址 | POST | `/api/addresses` | `{name, phone, region, detail, isDefault}` | `AddressService` |
 | 可用优惠券 | GET | `/api/coupons/usable` | `?items=productId:spec:qty,...` 或 POST 传 items | `List<UserCoupon>` |
 | 金额预览（可选） | POST | `/api/orders/preview` | `{addressId, couponId, items[]}` | `{itemAmount, shipFee, discount, payAmount}` |
 | 提交订单 | POST | `/api/orders` | `{addressId, couponId, items[], source: "cart"\|"buyNow"}` | `Order` |
@@ -128,7 +128,7 @@
 | 取消订单 | POST | `/api/orders/{orderNo}/cancel` | — | `Order` |
 | 模拟发货 | POST | `/api/orders/{orderNo}/ship` | — | `Order` |
 | 确认收货 | POST | `/api/orders/{orderNo}/receive` | — | `Order` |
-| 再次购买 | POST | `/api/cart/reorder/{orderNo}` | — | `Cart` |
+| 再次购买 | POST | `/api/cart/reorder/{orderNo}` | — | `CartService` |
 | 申请售后（接 Agent） | POST | `/api/orders/{orderNo}/after-sale` | `{reason}` | `{ticketId, status}` |
 
 **状态机**：`待发货 → 待收货 → 已完成`，`待发货` 可取消；取消时**退券**。
@@ -138,8 +138,8 @@
 | 前端动作 | 方法 | 路径 | 请求 | 返回 |
 |---|---|---|---|---|
 | 地址列表 | GET | `/api/addresses` | — | `List<Address>` |
-| 新增 | POST | `/api/addresses` | `{name, phone, region, detail, isDefault}` | `Address` |
-| 编辑 | PUT | `/api/addresses/{id}` | 同上 | `Address` |
+| 新增 | POST | `/api/addresses` | `{name, phone, region, detail, isDefault}` | `AddressService` |
+| 编辑 | PUT | `/api/addresses/{id}` | 同上 | `AddressService` |
 | 删除 | DELETE | `/api/addresses/{id}` | — | `{ok: true}` |
 | 设为默认 | PUT | `/api/addresses/{id}/default` | — | `List<Address>` |
 
@@ -358,7 +358,7 @@ com.chx.saleswithagent
 ## 7. 前端需要配合的改动（后端写好后）
 
 1. `js/api.js`：给每个接口加一个方法（`getCart`、`addCart`、`submitOrder`…）；
-2. `js/store.js`：`Cart`、`Coupons`、`Addr`、`Store.orders` 从"直接改数组"改成 `await API.xxx()`，本地只保留 UI 状态；
+2. `js/store.js`：`CartService`、`CouponsService`、`Addr`、`Store.orders` 从"直接改数组"改成 `await API.xxx()`，本地只保留 UI 状态；
 3. `js/app.js`：启动时并行拉商品 + 购物车 + 地址 + 券；
 4. `js/components/Checkout.js`：提交订单改为调接口，不再自己算金额；
 5. 第二阶段加登录页和 `Authorization` 头。

@@ -1,8 +1,8 @@
 /* 结算弹窗：地址 → 优惠券 → 汇总 → 提交订单 */
 Comps.Checkout = {
-  data() { return { aid: (Store.addrs.find(a => a.def) || Store.addrs[0] || {}).id, cid: '', adding: false }; },
+  data() { return { aid: (Store.addrs.find(a => a.def) || Store.addrs[0] || {}).id, cid: '', adding: false, busy: false }; },
   computed: {
-    items() { return Store.co.items; },
+    items() { return (Store.co && Store.co.items) || []; },
     sub() { return Cart.sum(this.items); },
     ship() { return this.sub >= 99 ? 0 : 8; },
     avail() { return Store.coupons.filter(c => Coupons.ok(c, this.items)); },
@@ -12,14 +12,43 @@ Comps.Checkout = {
   },
   created() { const b = [...this.avail].sort((x, y) => y.off - x.off)[0]; this.cid = b ? b.uid : ''; },
   methods: {
-    addAddr(a) { this.aid = Addr.save(a); this.adding = false; },
-    submit() {
+    async addAddr(a) { this.aid = await Addr.save(a); this.adding = false; },
+    async submit() {
+      if (this.busy) return;
+      this.busy = true;
+      try { await this._submit(); } finally { this.busy = false; }
+    },
+    async _submit() {
       const a = Store.addrs.find(x => x.id === this.aid);
       if (!a) return toast('请先选择收货地址');
+      const fromCart = !!Store.co.fromCart;
+      if (Net.orders) {
+        try {
+          const order = await Orders.create({
+            addressId: toId(a.id),
+            couponId: this.cp && /^\d+$/.test(String(this.cp.uid)) ? Number(this.cp.uid) : null,
+            items: this.items.map(i => ({ productId: i.id, spec: i.spec, quantity: i.qty })),
+            source: fromCart ? 'cart' : 'buyNow',
+          });
+          if (this.cp) this.cp.used = true;
+          if (fromCart) {
+            if (Net.cart) Cart.load();
+            else Store.cart = Store.cart.filter(i => !i.on);
+          }
+          Coupons.loadMine();
+          Store.co = null;
+          toast('订单已提交，应付 ¥' + order.pay);
+          go('#/me/orders');
+          return;
+        } catch (e) {
+          Net.orders = false;
+          netWarn('order-create', '下单接口不可用，改为本地演示下单：' + e.message);
+        }
+      }
       Store.orders.unshift({ no: 'SG' + Date.now(), t: Date.now(), st: '待发货', addr: { ...a }, sub: this.sub, ship: this.ship, off: this.off, pay: this.pay, cu: this.cp ? this.cp.uid : null,
         items: this.items.map(i => ({ id: i.id, spec: i.spec, qty: i.qty, price: byId(i.id).p })) });
       if (this.cp) this.cp.used = true;
-      if (Store.co.fromCart) Store.cart = Store.cart.filter(i => !i.on);
+      if (fromCart) Store.cart = Store.cart.filter(i => !i.on);
       Store.co = null; toast('订单已提交，应付 ¥' + this.pay + '（演示）'); go('#/me/orders');
     },
   },

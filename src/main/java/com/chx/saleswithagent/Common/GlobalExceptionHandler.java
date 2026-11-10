@@ -16,4 +16,13 @@ public class GlobalExceptionHandler {
                 .status(400)
                 .body(Result.fail(e.getErrorCode().getCode(),e.getErrorCode().getMessage()));
     }
+
+
+    //兜底异常处理
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Result> handleother(Exception e){
+        return ResponseEntity.status(400)
+                .body(Result.fail(400,"未知异常"));
+
+    }
 }

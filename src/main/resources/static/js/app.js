@@ -13,12 +13,13 @@ const app = Vue.createApp({
     addEventListener('keydown', e => { if (e.key === 'Escape') { Store.co = null; Store.cartOpen = false; } });
   },
 });
-Object.assign(app.config.globalProperties, { S: Store, byId, sold, stars, fmtTime, day, go, toast, Cart, Coupons });
+Object.assign(app.config.globalProperties, { S: Store, byId, sold, stars, fmtTime, day, go, toast, Cart, Coupons, Addr, Orders, Fav });
 Object.entries(Comps).forEach(([k, v]) => app.component(k, v));
 
 /* 启动顺序：先拉商品接口，再挂载应用。
    这样首屏渲染时 PRODUCTS 已经是后端数据，不需要额外做响应式替换。
-   接口失败（后端没启动/断网）则退回内置演示数据，页面照常可用。 */
+   接口失败（后端没启动/断网）则退回内置演示数据，页面照常可用。
+   其余业务数据（购物车/地址/券/订单/收藏）在挂载后并行同步，不阻塞首屏。 */
 (async () => {
   try {
     const list = await API.getProducts();
@@ -28,4 +29,5 @@ Object.entries(Comps).forEach(([k, v]) => app.component(k, v));
     console.warn('[拾光百货] 后端商品接口不可用，使用内置演示数据：' + e.message);
   }
   app.mount('#app');
+  bootstrap();
 })();

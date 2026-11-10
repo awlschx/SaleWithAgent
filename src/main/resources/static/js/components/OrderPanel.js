@@ -3,9 +3,50 @@ Comps.OrderPanel = {
   data: () => ({ f: '全部' }),
   computed: { list() { return Store.orders.filter(o => this.f === '全部' || o.st === this.f); } },
   methods: {
-    next(o) { o.st = o.st === '待发货' ? '待收货' : '已完成'; toast(o.st === '待收货' ? '商家已发货' : '已确认收货'); },
-    cancel(o) { o.st = '已取消'; const c = Store.coupons.find(x => x.uid === o.cu); if (c) c.used = false; toast('订单已取消，优惠券已退回'); },
-    again(o) { o.items.forEach(i => Cart.add(i.id, i.qty, i.spec)); Store.cartOpen = true; },
+    async next(o) {
+      if (Net.orders) {
+        try {
+          const updated = o.st === '待发货' ? await Orders.ship(o) : await Orders.receive(o);
+          toast(updated.st === '待收货' ? '商家已发货' : '已确认收货');
+          return;
+        } catch (e) {
+          Net.orders = false;
+          netWarn('order-next', '订单状态接口不可用，改为本地演示状态：' + e.message);
+        }
+      }
+      o.st = o.st === '待发货' ? '待收货' : '已完成';
+      toast(o.st === '待收货' ? '商家已发货' : '已确认收货');
+    },
+    async cancel(o) {
+      if (Net.orders) {
+        try {
+          await Orders.cancel(o);
+          toast('订单已取消，优惠券已退回');
+          return;
+        } catch (e) {
+          Net.orders = false;
+          netWarn('order-cancel', '取消订单接口不可用，改为本地演示状态：' + e.message);
+        }
+      }
+      o.st = '已取消';
+      const c = Store.coupons.find(x => String(x.uid) === String(o.cu));
+      if (c) c.used = false;
+      toast('订单已取消，优惠券已退回');
+    },
+    async again(o) {
+      if (Net.orders) {
+        try {
+          await Orders.reorder(o);
+          Store.cartOpen = true;
+          return;
+        } catch (e) {
+          Net.orders = false;
+          netWarn('order-again', '再次购买接口不可用，改为本地加购：' + e.message);
+        }
+      }
+      o.items.forEach(i => Cart.add(i.id, i.qty, i.spec));
+      Store.cartOpen = true;
+    },
   },
   template: `<div><div class="chips"><a v-for="s in ['全部','待发货','待收货','已完成','已取消']" :key="s" :class="{on:f===s}" @click="f=s">{{ s }}</a></div>
     <div class="empty" v-if="!list.length">暂无订单，<a @click="go('#/')">去逛逛</a></div>

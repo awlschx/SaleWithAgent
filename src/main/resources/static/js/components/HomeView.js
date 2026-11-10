@@ -1,6 +1,6 @@
 /* 首页：分类 + 轮播 + 领券 + 秒杀 + 商品列表 */
 Comps.HomeView = {
-  data: () => ({ cats: CATS, slides: SLIDES, pool: COUPON_POOL, flash: PRODUCTS.slice(0, 5), si: 0, sort: 'def', asc: true, n: 8, t: { h: '00', m: '00', s: '00' } }),
+  data: () => ({ cats: CATS, slides: SLIDES, pool: Store.couponPool, flash: PRODUCTS.slice(0, 5), si: 0, sort: 'def', asc: true, n: 8, t: { h: '00', m: '00', s: '00' } }),
   computed: {
     list() {
       const { cat, q } = Store;

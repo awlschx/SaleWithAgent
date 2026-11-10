@@ -1,5 +1,5 @@
 Comps.CouponPanel = {
-  data: () => ({ f: 'ok', pool: COUPON_POOL }),
+  data: () => ({ f: 'ok', pool: Store.couponPool }),
   computed: {
     ok() { return Store.coupons.filter(c => !c.used && c.exp > Date.now()); },
     dead() { return Store.coupons.filter(c => c.used || c.exp <= Date.now()); },

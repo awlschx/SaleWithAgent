@@ -13,7 +13,7 @@ Comps.Detail = {
   methods: {
     add() { Cart.add(this.p.id, this.qty, this.sel); toast('已加入购物车'); },
     buy() { Store.co = { items: [{ id: this.p.id, spec: this.sel, qty: this.qty }], fromCart: false }; },
-    fav() { const i = Store.favs.indexOf(this.p.id); i < 0 ? Store.favs.push(this.p.id) : Store.favs.splice(i, 1); },
+    fav() { Fav.toggle(this.p.id); },
   },
   template: `<div class="w pg"><div class="box">
   <div class="crumb"><a @click="go('#/')">首页</a> / <a @click="S.cat=p.c;go('#/')">{{ p.c }}</a> / {{ p.n }}</div>
