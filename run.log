@@ -1,0 +1,23 @@
+﻿
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.9)
+
+2026-11-09T21:35:17.576+08:00  INFO 89596 --- [SalesWIthAgent] [           main] c.c.s.SalesWIthAgentApplication          : Starting SalesWIthAgentApplication v0.0.1-SNAPSHOT using Java 25.0.1 with PID 89596 (C:\SalesWithAgent\SalesWIthAgent\target\SalesWIthAgent-0.0.1-SNAPSHOT.jar started by aswe in C:\SalesWithAgent\SalesWIthAgent)
+2026-11-09T21:35:17.578+08:00  INFO 89596 --- [SalesWIthAgent] [           main] c.c.s.SalesWIthAgentApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-11-09T21:35:18.415+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-11-09T21:35:18.428+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-09T21:35:18.428+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.27]
+2026-11-09T21:35:18.448+08:00  INFO 89596 --- [SalesWIthAgent] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 823 ms
+2026-11-09T21:35:18.607+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-11-09T21:35:18.893+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-09T21:35:18.962+08:00  INFO 89596 --- [SalesWIthAgent] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-11-09T21:35:18.969+08:00  INFO 89596 --- [SalesWIthAgent] [           main] c.c.s.SalesWIthAgentApplication          : Started SalesWIthAgentApplication in 1.737 seconds (process running for 2.091)
+2026-11-09T21:35:38.914+08:00  INFO 89596 --- [SalesWIthAgent] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-09T21:35:38.914+08:00  INFO 89596 --- [SalesWIthAgent] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-09T21:35:38.915+08:00  INFO 89596 --- [SalesWIthAgent] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>拾光百货</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+<div id="app">
+  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a @click="go('#/me/orders')">我的订单</a><a @click="go('#/me/coupons')">优惠券</a><a @click="go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
+  <header class="w hd">
+    <div class="logo" @click="reset">拾光<b>百货</b></div>
+    <div class="sb">
+      <form @submit.prevent="search"><input v-model.trim="q" placeholder="搜索商品，试试“耳机”"><button type="submit">搜索</button></form>
+      <div class="hot"><a v-for="h in hots" :key="h" @click="hot(h)">{{ h }}</a></div>
+    </div>
+    <button class="cartbtn" @click="S.cartOpen=true">我的购物车<i v-if="Cart.count()">{{ Cart.count() }}</i></button>
+  </header>
+  <component :is="view"></component>
+  <footer class="foot">拾光百货 · 演示站点，商品、评价与订单均为模拟数据</footer>
+  <cart-drawer></cart-drawer>
+  <checkout v-if="S.co"></checkout>
+  <bottom-nav></bottom-nav>
+  <div class="ts" v-if="S.msg">{{ S.msg }}</div>
+</div>
+
+<script src="vendor/vue.global.prod.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/components/Thumb.js"></script>
+<script src="js/components/CouponCard.js"></script>
+<script src="js/components/ProductCard.js"></script>
+<script src="js/components/HomeView.js"></script>
+<script src="js/components/Detail.js"></script>
+<script src="js/components/CartDrawer.js"></script>
+<script src="js/components/AddrForm.js"></script>
+<script src="js/components/Checkout.js"></script>
+<script src="js/components/AddressPanel.js"></script>
+<script src="js/components/CouponPanel.js"></script>
+<script src="js/components/OrderPanel.js"></script>
+<script src="js/components/Me.js"></script>
+<script src="js/components/BottomNav.js"></script>
+<script src="js/router.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
