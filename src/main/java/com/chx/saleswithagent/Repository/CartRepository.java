@@ -1,5 +1,7 @@
 package com.chx.saleswithagent.Repository;
 
+import com.chx.saleswithagent.DTO.AllSelectedDTO;
+import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.Entity.CartItemEntity;
 import com.chx.saleswithagent.VO.CartItemVO;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +24,7 @@ public class CartRepository {
         CartItemEntity e = new CartItemEntity();
         e.setId(rs.getLong("id"));
         e.setUserId(rs.getLong("user_id"));
-        e.setId(rs.getLong("product_id"));
+        e.setProductId(rs.getLong("product_id"));
         e.setSpec(rs.getString("spec"));
         e.setQuantity(rs.getInt("quantity"));
         e.setSelected(rs.getBoolean("selected"));
@@ -35,10 +37,10 @@ public class CartRepository {
     *
     *
      */
-    public int addOrMerge(Long userid, Long productId,String spec, Integer quantity,Boolean selected) {
+    public int addOrMerge(Long userid, Long itemId,String spec, Integer quantity,Boolean selected) {
         String sql = "INSERT INTO cart_items (user_id, product_id,spec, quantity,selected) VALUES (?, ?, ?, ?,?) " +
                 "ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)";
-        return jdbc.update(sql, userid, productId,spec, quantity,selected);
+        return jdbc.update(sql, userid, itemId,spec, quantity,selected);
     }
     /*
     *
@@ -62,6 +64,50 @@ public class CartRepository {
                     v.setSelected(rs.getBoolean("selected"));
                     v.setSubtotal(v.getPrice().multiply(BigDecimal.valueOf(v.getQuantity())));
                     return v;
-                } ,userId);
+                }
+                ,userId);
+    }
+    /*
+    *更新购物车数据，数量加减，勾选状态
+    *
+    *
+     */
+    public int updateItem(Long userId,Long itemId, CartItemUpdateDTO cartItemUpdateDTO){
+        String sql = "UPDATE cart_items SET quantity = ?, selected = ? WHERE cart_items.id = ? and user_id = ?";
+
+        return jdbc.update(sql,cartItemUpdateDTO.getQuantity(),cartItemUpdateDTO.getSelected(),itemId,userId);
+    }
+
+    /*
+    *删除购物车数据
+    *
+     */
+    public  int deleteItem(Long userId,Long itemId){
+        String sql = "DELETE FROM cart_items WHERE user_id = ? and id = ?";
+        return jdbc.update( sql,userId,itemId);
+    }
+    /*
+    *返回购物车的商品条数
+    *
+     */
+    public int count(Long userId){
+        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?";
+        return jdbc.queryForObject(sql, Integer.class,userId);
+    }
+    /*
+    *全勾选商品
+    *
+     */
+    public int allSelected(Long userId, AllSelectedDTO  allSelectedDTO) {
+        String sql = "update cart_items set selected = ? where user_id = ?";
+        return jdbc.update(sql,allSelectedDTO.getSelected(),userId);
+    }
+    /*
+    *删除选中商品
+    *
+     */
+    public int deleteSelected(Long userId) {
+        String sql = "DELETE FROM cart_items WHERE user_id = ? AND selected = 1";
+        return jdbc.update(sql,userId);
     }
 }

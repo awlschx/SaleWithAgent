@@ -62,6 +62,44 @@ const Cart = {
     clearTimeout(this._timer);
     this._timer = setTimeout(() => this._push(), 300);
   },
+  /* 删除选中：服务端优先，成功后再用服务端数据刷新本地 */
+  async deleteSelected() {
+    if (!Store.cart.some(i => i.on)) return;
+    // 后端购物车不可用时保持本地演示模式
+    if (!Net.cart) { Store.cart = Store.cart.filter(i => !i.on); return; }
+    if (this._deleting) return;
+    this._deleting = true;
+    try {
+      await API.removeSelectedCart();
+      await this.load();   // 成功后以服务端购物车为准
+      if (!Net.cart) {
+        // 删除成功但刷新失败：本地同步移除，避免显示已删除的条目
+        Store.cart = Store.cart.filter(i => !i.on);
+        this.snapshot();
+      }
+    } catch (e) {
+      netWarn('cart-del-selected', '删除选中失败：' + e.message);
+      toast('删除失败，请重试');
+    } finally {
+      this._deleting = false;
+    }
+  },
+  /* 全选/取消全选：调批量接口，不再逐条 PUT */
+  async selectAll(on) {
+    if (!Store.cart.length) return;
+    Store.cart.forEach(i => (i.on = on));
+    if (!Net.cart) return;
+    clearTimeout(this._timer);
+    this._applying = true;   // 阻止 watcher 逐条推送
+    try {
+      await API.selectAllCart(on);
+      this.snapshot();
+      Vue.nextTick(() => { this._applying = false; });
+    } catch (e) {
+      netWarn('cart-select-all', '全选接口不可用，改为逐条同步：' + e.message);
+      Vue.nextTick(() => { this._applying = false; this._schedule(); });
+    }
+  },
   /* 购物车抽屉里的数量 / 勾选 / 删除都是直接改本地数组，这里做差异同步 */
   async _push() {
     if (!Net.cart || this._applying) return;

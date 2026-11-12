@@ -1,5 +1,6 @@
 package com.chx.saleswithagent.Service;
 
+import com.chx.saleswithagent.DTO.AllSelectedDTO;
 import com.chx.saleswithagent.DTO.CartItemDTO;
 import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.VO.CartItemVO;
@@ -11,11 +12,15 @@ public interface CartService {
     List<CartItemVO> list(Long userId);
     Boolean addItem(Long userId,CartItemDTO cartItemDTO);
 
-    Boolean updateItem(Long productId, @Valid CartItemUpdateDTO dto);
+    Boolean updateItem(Long userId,Long itemId, @Valid CartItemUpdateDTO dto);
 
-    Boolean deleteItem(Long productId);
+    Boolean deleteItem(Long userId,Long itemId);
 
-    Boolean reorder(Long productId);
+    Boolean reorder(Long itemId);
 
-    Object count();
+    int count(Long itemId);
+
+    Boolean allSelected(Long userId, AllSelectedDTO allSelectedDTO);
+
+    Boolean deleteSelected(long id);
 }

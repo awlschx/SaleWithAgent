@@ -9,6 +9,16 @@ import java.time.LocalDateTime;
 public class CartItemEntity {
     private Long id;
     private Long userId;
+    private Long productId;
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
     private String spec;
     private Integer quantity;
     private Boolean selected;

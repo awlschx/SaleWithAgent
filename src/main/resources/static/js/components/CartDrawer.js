@@ -1,12 +1,12 @@
 Comps.CartDrawer = {
   computed: {
-    allOn: { get() { return Store.cart.length > 0 && Store.cart.every(i => i.on); }, set(v) { Store.cart.forEach(i => (i.on = v)); } },
+    allOn: { get() { return Store.cart.length > 0 && Store.cart.every(i => i.on); }, set(v) { Cart.selectAll(v); } },
     selCount() { return Cart.sel().reduce((a, i) => a + i.qty, 0); },
     total() { return Cart.sum(Cart.sel()); },
   },
   methods: {
     del(k) { Store.cart = Store.cart.filter(i => i.k !== k); },
-    delSel() { Store.cart = Store.cart.filter(i => !i.on); },
+    delSel() { return Cart.deleteSelected(); },
     checkout() { Store.cartOpen = false; Store.co = { items: Cart.sel().map(({ id, spec, qty }) => ({ id, spec, qty })), fromCart: true }; },
   },
   template: `<div><div class="ov" v-if="S.cartOpen" @click="S.cartOpen=false"></div>

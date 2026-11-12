@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 *
 */
 @Controller
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 public class ProductsController {
 }
