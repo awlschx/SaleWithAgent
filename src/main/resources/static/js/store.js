@@ -79,8 +79,9 @@ const Cart = {
           continue;
         }
         const prev = this._last.get(String(it.rid)) || {};
-        if (prev.qty !== it.qty) await API.updateCartItem(it.rid, it.qty);
-        if (prev.on !== it.on) await API.selectCartItem(it.rid, it.on);
+        if (prev.qty !== it.qty || prev.on !== it.on) {
+          await API.updateCartItem(it.rid, { quantity: it.qty, selected: it.on });
+        }
       }
       if (needReload) await this.load();
       else this.snapshot();

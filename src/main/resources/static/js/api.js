@@ -170,11 +170,12 @@ const API = (() => {
     async addCartItem(item) {
       return mapCart(await request('/cart/items', { method: 'POST', body: item }));
     },
-    async updateCartItem(itemId, quantity) {
-      return mapCart(await request('/cart/items/' + itemId, { method: 'PUT', body: { quantity } }));
-    },
-    async selectCartItem(itemId, selected) {
-      return mapCart(await request('/cart/items/' + itemId + '/selected', { method: 'PUT', body: { selected } }));
+    /* PUT 全量更新：quantity 和 selected 必须同时传 */
+    async updateCartItem(itemId, patch) {
+      return mapCart(await request('/cart/items/' + itemId, {
+        method: 'PUT',
+        body: { quantity: patch.quantity, selected: patch.selected },
+      }));
     },
     async selectAllCart(selected) {
       return mapCart(await request('/cart/selected', { method: 'PUT', body: { selected } }));

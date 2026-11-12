@@ -7,7 +7,7 @@ import lombok.Data;
 *
 */
 @Data
-public class CartDTO {
+public class CartItemDTO {
     //商品id
     private Long productId;
     //商品规格
