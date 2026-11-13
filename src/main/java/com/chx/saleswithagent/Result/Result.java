@@ -1,4 +1,4 @@
-package com.chx.saleswithagent.Common;
+package com.chx.saleswithagent.Result;
 
 /**
  * API响应类
