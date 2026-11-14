@@ -2,9 +2,11 @@ package com.chx.saleswithagent.Service.Impl;
 
 import ch.qos.logback.core.spi.ComponentTracker;
 import com.chx.saleswithagent.Entity.CouponsTemplateEntity;
+import com.chx.saleswithagent.Entity.UserCouponsEntity;
 import com.chx.saleswithagent.Repository.CouponsRepository;
 import com.chx.saleswithagent.Service.CouponsService;
 import com.chx.saleswithagent.VO.CouponsTemplateVO;
+import com.chx.saleswithagent.VO.UserCouponsVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,18 @@ public class CouponsServiceImpl implements CouponsService {
             CouponsTemplateVO couponsTemplateVO = new CouponsTemplateVO();
             BeanUtils.copyProperties(couponsTemplateEntity, couponsTemplateVO);
             list.add(couponsTemplateVO);
+        }
+        return list;
+    }
+
+    @Override
+    public List<UserCouponsVO> mineCoupons(Long userId,int status) {
+        List<UserCouponsEntity> e = couponsRepository.mineCoupons(userId,status);
+        List<UserCouponsVO> list = new ArrayList<>();
+        for (UserCouponsEntity c : e) {
+            UserCouponsVO v = new UserCouponsVO();
+            BeanUtils.copyProperties(c, UserCouponsVO.class);
+            list.add(v);
         }
         return list;
     }
