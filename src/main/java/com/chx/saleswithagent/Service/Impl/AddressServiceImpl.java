@@ -4,9 +4,8 @@ import com.chx.saleswithagent.DTO.AddressDTO;
 import com.chx.saleswithagent.Entity.AddressEntity;
 import com.chx.saleswithagent.Repository.AddressRepository;
 import com.chx.saleswithagent.Service.AddressService;
-import com.chx.saleswithagent.VO.addressVO;
+import com.chx.saleswithagent.VO.AddressVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,11 +21,11 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public addressVO addAddress(AddressDTO addressDTO) {
+    public AddressVO addAddress(AddressDTO addressDTO) {
             Long res = addressRepository.addAddress(addressDTO);
             if( res > 0){
                 AddressEntity e = addressRepository.getAddressById(res);
-                addressVO vo1 = new addressVO();
+                AddressVO vo1 = new AddressVO();
                 vo1.setId(e.getId());
                 vo1.setName(e.getName());
                 vo1.setDetail(e.getDetail());
@@ -39,12 +38,12 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public List<addressVO> getAddress(Long userId) {
-        List<addressVO> vo = new ArrayList<>();
+    public List<AddressVO> getAddress(Long userId) {
+        List<AddressVO> vo = new ArrayList<>();
         List<AddressEntity> e = new ArrayList<>();
         e = addressRepository.getAddressByUserId(userId);
         for (AddressEntity a:e){
-            addressVO vo1 = new addressVO();
+            AddressVO vo1 = new AddressVO();
             vo1.setId(a.getId());
             vo1.setName(a.getName());
             vo1.setDetail(a.getDetail());
@@ -54,5 +53,23 @@ public class AddressServiceImpl implements AddressService {
             vo.add(vo1);
         }
         return vo;
+    }
+
+    @Override
+    public AddressVO updateAddress(Long id, AddressDTO addressDTO) {
+        AddressEntity e = addressRepository.updateAddress(id, addressDTO);
+        AddressVO v = new AddressVO();
+        v.setId(e.getId());
+        v.setName(e.getName());
+        v.setDetail(e.getDetail());
+        v.setPhone(e.getPhone());
+        v.setIsDefault(e.getIsDefault());
+        v.setRegion(e.getRegion());
+        return v;
+    }
+
+    @Override
+    public Boolean deleteAddressById(Long id) {
+        return addressRepository.deleteAddressById(id) > 0;
     }
 }

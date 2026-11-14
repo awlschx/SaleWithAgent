@@ -3,7 +3,7 @@ package com.chx.saleswithagent.VO;
 import lombok.Data;
 
 @Data
-public class addressVO {
+public class AddressVO {
     private Long id;
     private String name;
     private String phone;

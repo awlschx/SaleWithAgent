@@ -37,10 +37,12 @@ public class CartRepository {
     *
     *
      */
-    public int addOrMerge(Long userid, Long itemId,String spec, Integer quantity,Boolean selected) {
-        String sql = "INSERT INTO cart_items (user_id, product_id,spec, quantity,selected) VALUES (?, ?, ?, ?,?) " +
-                "ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)";
-        return jdbc.update(sql, userid, itemId,spec, quantity,selected);
+    public int addOrMerge(Long userId, Long productId, String spec, Integer quantity, Boolean selected) {
+        String sql = "INSERT INTO cart_items (user_id, product_id, spec, quantity, selected) " +
+                "VALUES (?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE quantity = LEAST(quantity + ?, 99)";
+        return jdbc.update(sql, userId, productId, spec, quantity,
+                selected == null ? Boolean.TRUE : selected, quantity);
     }
     /*
     *

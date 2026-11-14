@@ -26,12 +26,15 @@ public class ProductsRepository {
     private static final RowMapper<ProductsEntity> ENTITY_MAPPER = (rs, i) -> {
         ProductsEntity e = new ProductsEntity();
         e.setId(rs.getInt("id"));
-        e.setProductName(rs.getString("name"));
+        e.setName(rs.getString("name"));
         e.setPrice(rs.getFloat("price"));
         e.setCategory(rs.getString("category"));
         e.setOriginalPrice(rs.getFloat("original_price"));
         e.setSales(rs.getInt("sales"));
         e.setStock(rs.getInt("stock"));
+        e.setHue(rs.getInt("hue"));
+        e.setFlashPrice(rs.getFloat("flash_price"));
+        e.setFlashPercent(rs.getInt("flash_percent"));
         var ts1 = rs.getTimestamp("created_at");
         var ts2 = rs.getTimestamp("updated_at");
         e.setCreateTime(ts1 == null ? null : ts1.toLocalDateTime());
@@ -50,12 +53,15 @@ public class ProductsRepository {
                 (rs, i) -> {
                     ProductsVO v = new ProductsVO();
                     v.setId(rs.getInt("id"));
-                    v.setProductName(rs.getString("name"));
+                    v.setName(rs.getString("name"));
                     v.setPrice(rs.getFloat("price"));
                     v.setCategory(rs.getString("category"));
                     v.setOriginalPrice(rs.getFloat("original_price"));
                     v.setSales(rs.getInt("sales"));
                     v.setStock(rs.getInt("stock"));
+                    v.setHue(rs.getInt("hue"));
+                    v.setFlashPrice(rs.getFloat("flash_price"));
+                    v.setFlashPercent(rs.getInt("flash_percent"));
                     var ts1 = rs.getTimestamp("created_at");
                     var ts2 = rs.getTimestamp("updated_at");
                     v.setCreateTime(ts1 == null ? null : ts1.toLocalDateTime());

@@ -35,4 +35,20 @@ public class AddressController {
         Long userId = CurrentUser.id();
         return Result.ok(addressService.getAddress(userId));
     }
+    /*
+    *编辑收货地址
+    *
+     */
+    @PutMapping("/{id}")
+    public Result updateAddress(@PathVariable Long id,@RequestBody AddressDTO addressDTO){
+        return Result.ok(addressService.updateAddress(id,addressDTO));
+    }
+    /*
+    *删除收货地址
+    *
+     */
+    @DeleteMapping("/{id}")
+    public Result deleteAddressById(@PathVariable Long id){
+        return Result.ok(addressService.deleteAddressById(id));
+    }
 }

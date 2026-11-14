@@ -75,4 +75,18 @@ public class AddressRepository {
         String sql = "SELECT * FROM addresses WHERE id = ?";
         return jdbc.queryForObject(sql,ENTITY_MAPPER,id);
     }
+    /*
+    *编辑收货地址
+    *
+     */
+    public AddressEntity updateAddress(Long id, AddressDTO addressDTO) {
+        String sql = "UPDATE addresses SET name=?,phone=?,region=?,detail=?,is_default=? WHERE id = ?";
+        jdbc.update(sql,addressDTO.getName(),addressDTO.getPhone(),addressDTO.getRegion(),addressDTO.getDetail(),addressDTO.getIsDefault(),id);
+        return getAddressById(id);
+    }
+
+    public int deleteAddressById(Long id) {
+        String sql = "DELETE FROM addresses WHERE id = ?";
+        return jdbc.update(sql,id);
+    }
 }
