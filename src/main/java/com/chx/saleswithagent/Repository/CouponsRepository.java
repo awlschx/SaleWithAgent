@@ -86,7 +86,7 @@ public class CouponsRepository {
         }
     }
 
-    private UserCouponsVO queryUserCoupon(Long userId, Long templateId) {
+    public UserCouponsVO queryUserCoupon(Long userId, Long templateId) {
         String sql =(
                 "SELECT uc.id, uc.template_id, t.title, t.min_amount, t.off_amount, " +
                         "       t.category, uc.used, uc.expire_at " +
@@ -150,5 +150,29 @@ public class CouponsRepository {
             return v;
         }, userId);
     }
-
+    /*
+    *根据user_coupon的id查优惠卷
+    *
+     */
+    public UserCouponsVO queryUserCouponById(Long userId, Long userCouponId) {
+        String sql =
+                "SELECT uc.id, uc.template_id, t.title, t.min_amount, t.off_amount, " +
+                        "       t.category, uc.used, uc.expire_at " +
+                        "FROM user_coupons uc " +
+                        "JOIN coupon_templates t ON t.id = uc.template_id " +
+                        "WHERE uc.id = ? AND uc.user_id = ?";
+        List<UserCouponsVO> list = jdbc.query(sql, (rs, i) -> {
+            UserCouponsVO v = new UserCouponsVO();
+            v.setId(rs.getLong("id"));
+            v.setTemplateId(rs.getLong("template_id"));
+            v.setTitle(rs.getString("title"));
+            v.setMinAmount(rs.getBigDecimal("min_amount"));
+            v.setOffAmount(rs.getBigDecimal("off_amount"));
+            v.setCategory(rs.getString("category"));
+            v.setUsed(rs.getBoolean("used"));
+            v.setExpireAt(rs.getTimestamp("expire_at").toLocalDateTime());
+            return v;
+        }, userCouponId, userId);
+        return list.isEmpty() ? null : list.get(0);
+    }
 }
