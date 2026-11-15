@@ -1,8 +1,6 @@
 package com.chx.saleswithagent.Service.Impl;
 
-import ch.qos.logback.core.spi.ComponentTracker;
 import com.chx.saleswithagent.Entity.CouponsTemplateEntity;
-import com.chx.saleswithagent.Entity.UserCouponsEntity;
 import com.chx.saleswithagent.Repository.CouponsRepository;
 import com.chx.saleswithagent.Service.CouponsService;
 import com.chx.saleswithagent.VO.CouponsTemplateVO;
@@ -31,14 +29,13 @@ public class CouponsServiceImpl implements CouponsService {
     }
 
     @Override
-    public List<UserCouponsVO> mineCoupons(Long userId,int status) {
-        List<UserCouponsEntity> e = couponsRepository.mineCoupons(userId,status);
-        List<UserCouponsVO> list = new ArrayList<>();
-        for (UserCouponsEntity c : e) {
-            UserCouponsVO v = new UserCouponsVO();
-            BeanUtils.copyProperties(c, UserCouponsVO.class);
-            list.add(v);
-        }
-        return list;
+    public List<UserCouponsVO> mineCoupons(Long userId,String status) {
+       return  couponsRepository.mineCoupons(userId,status);
+
+    }
+
+    @Override
+    public UserCouponsVO clickCoupons(Long userId, Long templateId) {
+        return couponsRepository.clickCoupons(userId,templateId);
     }
 }

@@ -10,5 +10,7 @@ import java.util.List;
 public interface CouponsService {
     List<CouponsTemplateVO> listCoupons();
 
-    List<UserCouponsVO> mineCoupons(Long userId ,int status);
+    List<UserCouponsVO> mineCoupons(Long userId ,String  status);
+
+    UserCouponsVO clickCoupons(Long userId, Long templateId);
 }

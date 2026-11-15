@@ -29,9 +29,19 @@ public class CouponsController {
     *获取我的优惠卷
     *
      */
-    @GetMapping("/mine/{status}")
-    public Result mineCoupons(@PathVariable int status){
+    @GetMapping("/mine")
+    public Result mineCoupons(@RequestParam(defaultValue="all") String status){
         Long userId = CurrentUser.id();
         return Result.ok(couponsService.mineCoupons(userId,status));
+    }
+    /*
+    *user领取优惠卷
+    *
+    *
+     */
+    @PostMapping("/{templateId}/claim")
+    public Result clickCoupons(@PathVariable Long templateId){
+        Long userId = CurrentUser.id();
+        return Result.ok(couponsService.clickCoupons(userId,templateId));
     }
 }
