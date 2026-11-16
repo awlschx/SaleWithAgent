@@ -44,4 +44,12 @@ public class CouponsController {
         Long userId = CurrentUser.id();
         return Result.ok(couponsService.clickCoupons(userId,templateId));
     }
+    /*
+    *删除优惠卷
+    *
+     */
+    @DeleteMapping("/delete")
+    public Result deleteCoupons(@RequestParam Long userCouponsId){
+        return Result.ok(couponsService.deleteCoupons(userCouponsId));
+    }
 }

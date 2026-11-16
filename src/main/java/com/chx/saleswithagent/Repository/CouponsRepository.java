@@ -175,4 +175,14 @@ public class CouponsRepository {
         }, userCouponId, userId);
         return list.isEmpty() ? null : list.get(0);
     }
+
+    /*
+    *根据usercoupons的id删除用户的优惠卷·
+    *
+     */
+    public Boolean deleteCoupons(Long userCouponsId) {
+        String sql = "DELETE FROM user_coupons WHERE id = ?";
+        return jdbc.update(sql, userCouponsId) > 0;
+
+    }
 }

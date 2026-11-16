@@ -3,6 +3,7 @@ package com.chx.saleswithagent.Controller;
 import com.chx.saleswithagent.Common.CurrentUser;
 import com.chx.saleswithagent.DTO.OrdersDTO;
 import com.chx.saleswithagent.Repository.CouponsRepository;
+import com.chx.saleswithagent.Repository.OrdersRepository;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.CouponsService;
 import com.chx.saleswithagent.Service.OrdersService;
@@ -42,4 +43,30 @@ public class OrdersController {
         return Result.ok(ordersService.addOrders(ordersDTO,userId));
     }
 
+    /*
+    *取消订单
+    *
+     */
+    @PostMapping("/{orderNo}/cancel")
+    public Result cancelOrders(@PathVariable String orderNo){
+        return Result.ok(ordersService.cancelOrders(orderNo));
+    }
+    /*
+    *模拟发货
+    *
+     */
+    @PostMapping("/{orderNo}/ship")
+    public Result shipOrders(@PathVariable String orderNo){
+        return Result.ok(ordersService.shipOrders(orderNo));
+    }
+
+    /*
+    *确认收货
+    *
+    *
+     */
+    @PostMapping("/{orderNo}/receive")
+    public Result receiveOrders(@PathVariable String orderNo){
+        return Result.ok(ordersService.receiveOrders(orderNo));
+    }
 }

@@ -24,15 +24,18 @@ public class OrdersServiceImpl implements OrdersService {
     private OrdersRepository ordersRepository;
     @Override
     public List<OrdersVO> getOrders(Long userId, String status) {
+        log.info("status{}",status);
         List<OrdersEntity> orders = ordersRepository.getOrders(userId, status);
+        log.info("orders{}",orders);
         if (orders.isEmpty()) {
             return List.of();
         }
 
         List<Long> orderIds = orders.stream().map(OrdersEntity::getId).toList();
+        log.info("orderIds:{}",orderIds);
         Map<Long, List<OrdersItemsEntity>> itemMap =
                 ordersRepository.getOrdersItems(orderIds);
-
+        log.info("itemMap:{}",itemMap);
         List<OrdersVO> result = new ArrayList<>(orders.size());
 
         for (OrdersEntity o : orders) {
@@ -56,5 +59,23 @@ public class OrdersServiceImpl implements OrdersService {
     public OrdersVO addOrders(OrdersDTO ordersDTO, Long userId) {
        return ordersRepository.addOrders(ordersDTO,userId);
 
+    }
+
+    @Override
+    public OrdersVO cancelOrders(String orderNo) {
+        return ordersRepository.cancelOrders(orderNo);
+    }
+
+    @Override
+    public OrdersVO shipOrders(String orderNo) {
+        //模拟发货要改orders表，把status改为已发货
+        log.info("准备发货");
+        return ordersRepository.shipOrders(orderNo);
+    }
+
+    @Override
+    public OrdersVO receiveOrders(String orderNo) {
+        log.info("确认收货");
+        return ordersRepository.receiveOrders(orderNo);
     }
 }

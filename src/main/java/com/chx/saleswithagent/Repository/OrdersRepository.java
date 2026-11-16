@@ -12,6 +12,7 @@ import com.chx.saleswithagent.VO.UserCouponsVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.servlet.filter.OrderedFilter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +39,10 @@ public class OrdersRepository {
         this.objectMapper = objectMapper;
     }
 
+
+
     /*
-    *获取每个用户的订单详细
+    *获取每个用户的全部订单详细
     *
      */
     public List<OrdersEntity> getOrders(Long userId,String status) {
@@ -56,7 +59,9 @@ public class OrdersRepository {
             args.add(status);
         }
         sql.append(" ORDER BY created_at DESC");
-        return jdbc.query(sql.toString(),
+        log.info("getOrders{}",sql);
+        List<OrdersEntity> ordersEntities = new ArrayList<>();
+        ordersEntities = jdbc.query(sql.toString(),
                 (rs,i) ->{
                     OrdersEntity e = new OrdersEntity();
                     e.setId(rs.getLong("id"));
@@ -93,10 +98,13 @@ public class OrdersRepository {
                     else{
                         e.setReceiveTime(receiveTime.toLocalDateTime());
                     }
-        return e;},args);
+
+        return e;},args.toArray());
+        log.info("getOrders{}",ordersEntities);
+        return ordersEntities;
     }
     /*
-    *根据订单号获取订单
+    *根据订单号获取订单（还不包含items）
     *
      */
     public OrdersEntity getOrderById(String orderNo) {
@@ -191,17 +199,31 @@ public class OrdersRepository {
         }
 
         BigDecimal shipPrice = BigDecimal.ZERO;
-        UserCouponsVO userCouponsVO = couponsRepository.queryUserCouponById(userId, ordersDTO.getCouponId());
-        //校验
-        if (userCouponsVO == null && userCouponsVO.getUsed() == false) {
-            throw new RuntimeException();
+        BigDecimal minAmount = BigDecimal.ZERO;
+        BigDecimal offAmount = BigDecimal.ZERO;
+        BigDecimal actualPay = BigDecimal.ZERO;
+        actualPay = actualPay.add(total_price);
+        log.info("couponId{}",String.valueOf(ordersDTO.getCouponId()));
+        if(ordersDTO.getCouponId()!=null){
+            //查询优惠卷
+            UserCouponsVO userCouponsVO = couponsRepository.queryUserCouponById(userId, ordersDTO.getCouponId());
+            //删除优惠卷
+            couponsRepository.deleteCoupons(ordersDTO.getCouponId());
+            //校验
+            if (userCouponsVO == null || userCouponsVO.getUsed() == true) {
+                throw new RuntimeException();
+            }
+             minAmount = userCouponsVO.getMinAmount();
+             offAmount = userCouponsVO.getOffAmount();
+             if (total_price.compareTo(minAmount) >= 0) {
+                 actualPay = total_price.subtract(offAmount);
+            }
+
         }
-        BigDecimal minAmount = userCouponsVO.getMinAmount();
-        BigDecimal offAmount = userCouponsVO.getOffAmount();
-        if (total_price.compareTo(minAmount) < 0) {
-            throw new RuntimeException();
-        }
-        BigDecimal actualPay = total_price.subtract(offAmount);
+
+        log.info("actualPay{}",String.valueOf(actualPay));
+        log.info("total_price{}",String.valueOf(total_price));
+
         //获取收货地址
         Long addressId = ordersDTO.getAddressId();
         AddressEntity addressEntity = addressRepository.getAddressById(addressId);
@@ -226,25 +248,25 @@ public class OrdersRepository {
         //根据订单号获取该订单再返回前端
         OrdersEntity orderEntityById = getOrderById(orderNo);
         Long orderId = orderEntityById.getId();
-        log.info(orderEntityById.toString());
+        //log.info(orderEntityById.toString());
         Map<Long, List<OrdersItemsEntity>> ordersItems1 = getOrdersItems(Collections.singletonList(orderId));
-        log.info("ordersItems1: " + ordersItems1.toString());
+        //log.info("ordersItems1: " + ordersItems1.toString());
         OrdersVO vo = new OrdersVO();
 
         BeanUtils.copyProperties(orderEntityById, vo);   // 单对象复制，字段名要一致
-        log.info(vo.toString());
+        //log.info(vo.toString());
         List<OrderItemsVO> items = new ArrayList<>();
         List<OrdersItemsEntity> orDefault = ordersItems1.getOrDefault(orderEntityById.getId(), List.of());
-        log.info("orDefault{}", orDefault.toString());
+        //log.info("orDefault{}", orDefault.toString());
         for (OrdersItemsEntity item : orDefault) {
             OrderItemsVO iv = new OrderItemsVO();
-            log.info(item.toString());
+            //log.info(item.toString());
 
             BeanUtils.copyProperties(item, iv);
-            log.info(iv.toString());
+            //log.info(iv.toString());
             items.add(iv);
         }
-        log.info(items.toString());
+        //log.info(items.toString());
         vo.setItems(items);
         if ("cart".equals(ordersDTO.getSource())) {
             String deleteCartSql =
@@ -258,5 +280,61 @@ public class OrdersRepository {
         }
 
         return vo;
+    }
+    /*
+    *根据订单号获取可以返回前端的订单（包含items）
+     */
+    public OrdersVO getTrueOrdersVO(String orderNo){
+        OrdersEntity ordersEntity = getOrderById(orderNo);
+        OrdersVO vo = new OrdersVO();
+        BeanUtils.copyProperties(ordersEntity, vo);
+        //获取items
+        Map<Long, List<OrdersItemsEntity>> ordersItems
+                = getOrdersItems(Collections.singletonList(ordersEntity.getId()));
+        List<OrderItemsVO>  items = new ArrayList<>();
+        //获取每个订单的商品集合
+        List<OrdersItemsEntity> orDefault =
+                ordersItems.getOrDefault(ordersEntity.getId(), List.of());
+        for (OrdersItemsEntity item : orDefault) {
+            OrderItemsVO iv = new OrderItemsVO();
+            BeanUtils.copyProperties(item, iv);
+            items.add(iv);
+
+        }
+        vo.setItems(items);
+        return vo;
+
+
+    }
+
+
+    /*
+    *取消订单
+    *
+     */
+   public OrdersVO cancelOrders(String orderNo) {
+        String order_sql = "UPDATE orders SET status = '已取消' WHERE order_no = ?";
+        String item_sql = "DELETE FROM order_items WHERE order_id = (SELECT id FROM orders WHERE order_no = ?)";
+        jdbc.update(order_sql, orderNo);
+       OrdersVO trueOrdersVO = getTrueOrdersVO(orderNo);
+       jdbc.update(item_sql, orderNo);
+        return trueOrdersVO;
+   }
+
+   /*
+   *模拟发货
+   *
+    */
+    public OrdersVO shipOrders(String orderNo) {
+        String sql = "UPDATE orders SET status = '待收货' ,ship_time = NOW() WHERE order_no = ?";
+        jdbc.update(sql,orderNo);
+        return getTrueOrdersVO(orderNo);
+
+    }
+
+    public OrdersVO receiveOrders(String orderNo) {
+        String sql = "UPDATE orders SET status = '已完成' ,receive_time = NOW() WHERE order_no = ?";
+        jdbc.update(sql,orderNo);
+        return getTrueOrdersVO(orderNo);
     }
 }

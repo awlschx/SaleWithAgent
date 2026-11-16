@@ -38,4 +38,9 @@ public class CouponsServiceImpl implements CouponsService {
     public UserCouponsVO clickCoupons(Long userId, Long templateId) {
         return couponsRepository.clickCoupons(userId,templateId);
     }
+
+    @Override
+    public Boolean deleteCoupons(Long userCouponsId) {
+        return couponsRepository.deleteCoupons(userCouponsId);
+    }
 }

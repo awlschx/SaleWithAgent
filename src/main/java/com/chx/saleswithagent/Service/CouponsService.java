@@ -13,4 +13,6 @@ public interface CouponsService {
     List<UserCouponsVO> mineCoupons(Long userId ,String  status);
 
     UserCouponsVO clickCoupons(Long userId, Long templateId);
+
+    Boolean deleteCoupons(Long userCouponsId);
 }
