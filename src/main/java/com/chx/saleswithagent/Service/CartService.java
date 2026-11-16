@@ -4,6 +4,7 @@ import com.chx.saleswithagent.DTO.AllSelectedDTO;
 import com.chx.saleswithagent.DTO.CartItemDTO;
 import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.VO.CartItemVO;
+import com.chx.saleswithagent.VO.CartVO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -16,11 +17,13 @@ public interface CartService {
 
     Boolean deleteItem(Long userId,Long itemId);
 
-    Boolean reorder(Long itemId);
+    CartVO reorder(String orderNo,Long userId);
 
     int count(Long itemId);
 
     Boolean allSelected(Long userId, AllSelectedDTO allSelectedDTO);
 
     Boolean deleteSelected(long id);
+
+    CartVO buildCart(Long userId);
 }

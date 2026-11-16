@@ -3,12 +3,11 @@ package com.chx.saleswithagent.Repository;
 import com.chx.saleswithagent.DTO.OrdersDTO;
 import com.chx.saleswithagent.DTO.OrdersItemsDTO;
 import com.chx.saleswithagent.Entity.AddressEntity;
+import com.chx.saleswithagent.Entity.CartItemEntity;
 import com.chx.saleswithagent.Entity.OrdersEntity;
 import com.chx.saleswithagent.Entity.OrdersItemsEntity;
-import com.chx.saleswithagent.VO.AddressVO;
-import com.chx.saleswithagent.VO.OrderItemsVO;
-import com.chx.saleswithagent.VO.OrdersVO;
-import com.chx.saleswithagent.VO.UserCouponsVO;
+import com.chx.saleswithagent.Service.Impl.CartServiceImpl;
+import com.chx.saleswithagent.VO.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +32,7 @@ public class OrdersRepository {
     private CouponsRepository couponsRepository;
     @Resource
     private AddressRepository addressRepository;
+
     public OrdersRepository(JdbcTemplate jdbc,
                             ObjectMapper objectMapper) {
         this.jdbc = jdbc;
@@ -238,7 +238,7 @@ public class OrdersRepository {
                 shipPrice, offAmount, actualPay, address, ordersDTO.getCouponId());
         //把item插入orderitems
         String item_sql = "INSERT INTO order_items (order_id,product_id,product_name,spec,price,quantity)" +
-                " VALUES ((SELECT id FROM orders WHERE order_no = ? ),?,(SELECT product_name FROM products WHERE id = ?),?,(SELECT price FROM products WHERE id = ?),?)";
+                " VALUES ((SELECT id FROM orders WHERE order_no = ? ),?,(SELECT name FROM products WHERE id = ?),?,(SELECT price FROM products WHERE id = ?),?)";
         for(OrdersItemsDTO ordersItem : ordersItems){
             Long productId = ordersItem.getProductId();
             int quantity = ordersItem.getQuantity();
@@ -332,9 +332,14 @@ public class OrdersRepository {
 
     }
 
+    /*
+    *确认收货
+    *
+     */
     public OrdersVO receiveOrders(String orderNo) {
         String sql = "UPDATE orders SET status = '已完成' ,receive_time = NOW() WHERE order_no = ?";
         jdbc.update(sql,orderNo);
         return getTrueOrdersVO(orderNo);
     }
+
 }

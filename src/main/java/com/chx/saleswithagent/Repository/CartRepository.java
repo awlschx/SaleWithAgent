@@ -3,7 +3,14 @@ package com.chx.saleswithagent.Repository;
 import com.chx.saleswithagent.DTO.AllSelectedDTO;
 import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.Entity.CartItemEntity;
+import com.chx.saleswithagent.Entity.OrdersItemsEntity;
+import com.chx.saleswithagent.Service.Impl.CartServiceImpl;
 import com.chx.saleswithagent.VO.CartItemVO;
+import com.chx.saleswithagent.VO.CartVO;
+import jakarta.annotation.Resource;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -11,9 +18,11 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Repository
 public class CartRepository {
     private final JdbcTemplate jdbc;
+
 
     public CartRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -111,5 +120,37 @@ public class CartRepository {
     public int deleteSelected(Long userId) {
         String sql = "DELETE FROM cart_items WHERE user_id = ? AND selected = 1";
         return jdbc.update(sql,userId);
+    }
+    /*
+     *再次购买
+     *
+     */
+    public void reorderOrders(String orderNo, Long userId){
+        //后端按orderNo和userId查orderitems里面的商品，写入cartitems，返回给前端cartVO
+        String orderItemSql = "SELECT product_id, spec, quantity " +
+                "FROM order_items oi " +
+                "JOIN orders o ON o.id = oi.order_id " +
+                "WHERE o.order_no = ? AND o.user_id = ?;";
+        List<OrdersItemsEntity> e = jdbc.query(orderItemSql,
+                (rs,i) -> {
+                    OrdersItemsEntity ordersItemsEntity = new OrdersItemsEntity();
+                    ordersItemsEntity.setProductId(rs.getLong("product_id"));
+                    ordersItemsEntity.setQuantity(rs.getInt("quantity"));
+                    ordersItemsEntity.setSpec(rs.getString("spec"));
+                    return  ordersItemsEntity;
+                },orderNo,userId);
+        log.info(String.valueOf(e.get(1)));
+        String cartItemSql = "INSERT INTO cart_items (user_id,product_id,spec,quantity,selected) VALUES (?,?,?,?,1)" +
+                " ON DUPLICATE KEY UPDATE quantity = quantity + ?";
+        List<Object[]> args = e.stream().
+                map(i -> new Object[]{
+                        userId,
+                        i.getProductId(),
+                        i.getSpec(),
+                        i.getQuantity(),
+                        i.getQuantity()
+                }).toList();
+        jdbc.batchUpdate(cartItemSql,args);
+
     }
 }

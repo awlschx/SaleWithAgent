@@ -28,7 +28,7 @@ public class CartController {
     @GetMapping
     public Result<CartVO> list(){
         log.info("获取购物车数据");
-        return Result.ok(buildCart(CurrentUser.id()));
+        return Result.ok(cartService.buildCart(CurrentUser.id()));
     }
     /*
     *添加商品进购物车
@@ -39,7 +39,7 @@ public class CartController {
         log.info("添加购物车数据");
         Long userId = CurrentUser.id();
         cartService.addItem(userId, cartItemDTO);
-        return Result.ok(buildCart(userId));
+        return Result.ok(cartService.buildCart(userId));
     }
     /*
     *更新购物车数据（数量(加减购物车数量)，勾选状态）
@@ -51,7 +51,7 @@ public class CartController {
         log.info("更新购物车数据");
         Long userId = CurrentUser.id();
         cartService.updateItem(userId, itemId, dto);
-        return Result.ok(buildCart(userId));
+        return Result.ok(cartService.buildCart(userId));
     }
     /*
     *删除购物车商品
@@ -62,15 +62,16 @@ public class CartController {
         log.info("删除商品");
         Long userId = CurrentUser.id();
         cartService.deleteItem(userId, itemId);
-        return Result.ok(buildCart(userId));
+        return Result.ok(cartService.buildCart(userId));
     }
     /*
     *在购物车页面点击再次购买
     *
      */
-    @PostMapping("/reorder/{itemId}")
-    public Result reorder(@PathVariable Long itemId){
-        return Result.ok(cartService.reorder(itemId));
+    @PostMapping("/reorder/{orderNo}")
+    public Result reorder(@PathVariable String orderNo){
+        Long userId = CurrentUser.id();
+        return Result.ok(cartService.reorder(orderNo,userId));
     }
     /*
     *返回购物车当前商品数量,用作购物车角标
@@ -89,7 +90,7 @@ public class CartController {
     public Result<CartVO> allSelected(@RequestBody AllSelectedDTO allSelectedDTO){
         Long userId = CurrentUser.id();
         cartService.allSelected(userId, allSelectedDTO);
-        return Result.ok(buildCart(userId));
+        return Result.ok(cartService.buildCart(userId));
     }
     /*
     *删除选中商品
@@ -99,21 +100,9 @@ public class CartController {
     public Result<CartVO> deleteSelected(){
         Long userId = CurrentUser.id();
         cartService.deleteSelected(userId);
-        return Result.ok(buildCart(userId));
+        return Result.ok(cartService.buildCart(userId));
     }
 
-    /* 统一构建购物车返回：条目 + 总件数 + 选中金额 */
-    private CartVO buildCart(Long userId) {
-        List<CartItemVO> items = cartService.list(userId);
-        CartVO vo = new CartVO();
-        vo.setItems(items);
-        vo.setTotalQuantity(items.stream()
-                .mapToInt(CartItemVO::getQuantity).sum());
-        vo.setSelectedAmount(items.stream()
-                .filter(CartItemVO::isSelected)
-                .map(CartItemVO::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-        return vo;
-    }
+
 
 }

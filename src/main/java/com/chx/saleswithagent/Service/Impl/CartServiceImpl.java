@@ -4,10 +4,14 @@ import com.chx.saleswithagent.DTO.AllSelectedDTO;
 import com.chx.saleswithagent.DTO.CartItemDTO;
 import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.Repository.CartRepository;
+import com.chx.saleswithagent.Repository.OrdersRepository;
 import com.chx.saleswithagent.Service.CartService;
 import com.chx.saleswithagent.VO.CartItemVO;
+import com.chx.saleswithagent.VO.CartVO;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -44,8 +48,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Boolean reorder(Long itemId) {
-        return null;
+    public CartVO reorder(String orderNo,Long userId) {
+        //后端按orderNo和userId查orderitems里面的商品，写入cartitems，返回给前端cartVO
+        cartRepository.reorderOrders(orderNo,userId);
+        return buildCart(userId);
     }
 
     @Override
@@ -61,5 +67,19 @@ public class CartServiceImpl implements CartService {
     @Override
     public Boolean deleteSelected(long id) {
         return cartRepository.deleteSelected(id)>0;
+    }
+
+    /* 统一构建购物车返回：条目 + 总件数 + 选中金额 */
+    public CartVO buildCart(Long userId) {
+        List<CartItemVO> items = list(userId);
+        CartVO vo = new CartVO();
+        vo.setItems(items);
+        vo.setTotalQuantity(items.stream()
+                .mapToInt(CartItemVO::getQuantity).sum());
+        vo.setSelectedAmount(items.stream()
+                .filter(CartItemVO::isSelected)
+                .map(CartItemVO::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        return vo;
     }
 }
