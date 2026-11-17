@@ -7,7 +7,7 @@ Comps.CartDrawer = {
   methods: {
     del(k) { Store.cart = Store.cart.filter(i => i.k !== k); },
     delSel() { return Cart.deleteSelected(); },
-    checkout() { Store.cartOpen = false; Store.co = { items: Cart.sel().map(({ id, spec, qty }) => ({ id, spec, qty })), fromCart: true }; },
+    checkout() { if (!Auth.require()) return; Store.cartOpen = false; Store.co = { items: Cart.sel().map(({ id, spec, qty }) => ({ id, spec, qty })), fromCart: true }; },
   },
   template: `<div><div class="ov" v-if="S.cartOpen" @click="S.cartOpen=false"></div>
   <aside class="dw" :class="{on:S.cartOpen}">

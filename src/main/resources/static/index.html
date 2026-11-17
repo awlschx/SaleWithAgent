@@ -9,7 +9,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a @click="go('#/me/orders')">我的订单</a><a @click="go('#/me/coupons')">优惠券</a><a @click="go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
+  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
   <header class="w hd">
     <div class="logo" @click="reset">拾光<b>百货</b></div>
     <div class="sb">
@@ -43,6 +43,7 @@
 <script src="js/components/CouponPanel.js"></script>
 <script src="js/components/OrderPanel.js"></script>
 <script src="js/components/Me.js"></script>
+<script src="js/components/LoginView.js"></script>
 <script src="js/components/BottomNav.js"></script>
 <script src="js/router.js"></script>
 <script src="js/app.js"></script>

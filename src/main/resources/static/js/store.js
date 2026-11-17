@@ -4,6 +4,8 @@
 const Store = Vue.reactive({
   cart: [], favs: [], orders: [], addrs: [], coupons: [],
   couponPool: COUPON_POOL.map(c => ({ ...c })),
+  user: (() => { try { return JSON.parse(localStorage.getItem('sg_user')) || null; } catch (e) { return null; } })(),
+  token: localStorage.getItem('sg_token') || '',
   route: { name: 'home' }, cartOpen: false, co: null, msg: '', q: '', cat: '全部',
 });
 ['cart', 'favs', 'orders', 'addrs', 'coupons'].forEach(k => {
@@ -30,6 +32,7 @@ const go = h => { location.hash = h; };
 const Cart = {
   _last: new Map(), _timer: null, _applying: false,
   add(id, qty, spec) {
+    if (!Auth.require()) return;
     const k = id + '|' + spec, it = Store.cart.find(i => i.k === k);
     it ? (it.qty = Math.min(99, it.qty + qty)) : Store.cart.push({ k, id, spec, qty, on: true });
   },
@@ -152,6 +155,7 @@ const Coupons = {
     }
   },
   claim(c) {
+    if (!Auth.require()) return;
     if (Coupons.owned(c)) return toast('这张券已经领过了');
     if (!Net.coupons) return Coupons.claimLocal(c);
     return API.claimCoupon(c.id).then(uc => {
@@ -300,6 +304,7 @@ const Fav = {
     }
   },
   toggle(id) {
+    if (!Auth.require()) return;
     const i = Store.favs.indexOf(id);
     const want = i < 0;
     i < 0 ? Store.favs.push(id) : Store.favs.splice(i, 1);
@@ -312,6 +317,81 @@ const Fav = {
       Net.fav = false;
       netWarn('fav-toggle', '收藏同步失败，保持本地状态：' + e.message);
     });
+  },
+};
+
+/* 登录状态：token 存 localStorage，api.js 会自动带 Authorization 头 */
+const Auth = {
+  /* 需要登录的操作统一走这里：未登录则跳登录页并返回 false */
+  require() {
+    if (Store.user) return true;
+    toast('请先登录');
+    go('#/login');
+    return false;
+  },
+  /* 需要登录才能看的页面入口 */
+  go(h) {
+    if (Store.user) go(h);
+    else { toast('请先登录'); go('#/login'); }
+  },
+  apply(data, phone) {
+    const d = data || {};
+    const token = d.token || d.accessToken || '';
+    const u = d.user || {
+      id: d.userId ?? d.id ?? null,
+      phone: d.phone ?? phone ?? '',
+      nickname: d.nickname ?? d.nickName ?? d.username ?? '',
+    };
+    Store.token = token;
+    Store.user = {
+      id: u.id ?? u.userId ?? null,
+      phone: u.phone ?? phone ?? '',
+      nickname: u.nickname ?? '',
+    };
+    try {
+      if (token) localStorage.setItem('sg_token', token);
+      else localStorage.removeItem('sg_token');
+      localStorage.setItem('sg_user', JSON.stringify(Store.user));
+    } catch (e) {}
+  },
+  async login(phone, password) {
+    const data = await API.login(phone, password);
+    this.apply(data, phone);
+    await this.reload();
+    return data;
+  },
+  async register(phone, password, nickname) {
+    const data = await API.register(phone, password, nickname);
+    if (data && (data.token || data.userId)) {
+      this.apply(data, phone);
+      await this.reload();
+    }
+    return data;
+  },
+  /* 登录/退出后按当前身份重新同步购物车、地址、券、订单、收藏 */
+  async reload() {
+    Store.cart = [];
+    Store.favs = [];
+    Store.orders = [];
+    Store.addrs = [];
+    Store.coupons = [];
+    await bootstrap();
+  },
+  logout() {
+    API.logout().catch(() => {});
+    Store.token = '';
+    Store.user = null;
+    Store.cart = [];
+    Store.favs = [];
+    Store.orders = [];
+    Store.addrs = [];
+    Store.coupons = [];
+    try {
+      localStorage.removeItem('sg_token');
+      localStorage.removeItem('sg_user');
+    } catch (e) {}
+    go('#/');
+    toast('已退出登录');
   },
 };
 

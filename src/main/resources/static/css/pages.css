@@ -34,8 +34,15 @@
 .ad em{font-style:normal;font-size:11px;background:var(--pr);color:#fff;padding:0 6px;border-radius:2px;margin-left:6px}
 .ad .ab{margin-top:6px;display:flex;gap:14px;font-size:12px;color:var(--mu)}.ad .ab a:hover{color:var(--pr)}
 .fm{display:grid;gap:10px;max-width:520px;margin-top:8px}
-.fm input[type=text],.fm select{border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:8px 10px;border-radius:4px;font:inherit;width:100%}
+.fm input[type=text],.fm input[type=password],.fm select{border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:8px 10px;border-radius:4px;font:inherit;width:100%}
 .fm label.ck{display:flex;gap:6px;align-items:center}.fm .btns{margin-top:0}
+.login-box{max-width:420px;margin:24px auto;padding:24px}
+.login-btn{width:100%;padding:10px}
+.login-err{color:#d33;font-size:13px}
+.login-tip{color:var(--mu);text-align:center}
+.login-tip a{color:var(--pr)}
+.login-welcome{color:var(--mu);font-size:13px;margin-bottom:12px}
+.login-welcome a{color:var(--pr);margin-left:8px}
 .dlg.co{grid-template-columns:1fr;max-width:580px;gap:0}.co h4{margin:16px 0 6px}
 .co .sm{display:flex;justify-content:space-between;padding:3px 0}.co .sm.t{font-size:18px;border-top:1px solid var(--ln);margin-top:8px;padding-top:10px}.co .sm.t b{color:var(--pr)}
 .co .ai{display:flex;gap:8px;padding:8px 10px;border:1px solid var(--ln);border-radius:4px;margin-bottom:6px;cursor:pointer}.co .ai.on{border-color:var(--pr);background:var(--pr2)}

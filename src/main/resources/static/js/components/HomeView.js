@@ -32,8 +32,12 @@ Comps.HomeView = {
       <div class="dots"><i v-for="(s,i) in slides" :key="i" :class="{on:si===i}" @click="si=i"></i></div>
     </div>
     <aside class="me">
-      <div class="u"><div class="av">客</div><div><div>Hi，欢迎回来</div><small style="color:var(--mu)">登录后查看专属优惠</small></div></div>
-      <div class="q"><a @click="go('#/me/orders')"><b>{{ S.orders.length }}</b>订单</a><a @click="go('#/me/address')"><b>{{ S.addrs.length }}</b>地址</a><a @click="go('#/me/coupons')"><b>{{ S.coupons.filter(c=>!c.used&&c.exp>Date.now()).length }}</b>优惠券</a></div>
+      <div class="u">
+        <div class="av">{{ S.user ? (S.user.nickname || S.user.phone || '我').slice(0, 1) : '客' }}</div>
+        <div v-if="S.user"><div>Hi，{{ S.user.nickname || S.user.phone }}</div><small style="color:var(--mu)"><a @click="Auth.logout()">退出登录</a></small></div>
+        <div v-else style="cursor:pointer" @click="go('#/login')"><div>Hi，欢迎回来</div><small style="color:var(--mu)">登录 / 注册查看专属优惠</small></div>
+      </div>
+      <div class="q"><a @click="Auth.go('#/me/orders')"><b>{{ S.orders.length }}</b>订单</a><a @click="Auth.go('#/me/address')"><b>{{ S.addrs.length }}</b>地址</a><a @click="Auth.go('#/me/coupons')"><b>{{ S.coupons.filter(c=>!c.used&&c.exp>Date.now()).length }}</b>优惠券</a></div>
       <div class="note">全场满 99 元包邮，7 天无理由退换。</div>
     </aside>
   </section>

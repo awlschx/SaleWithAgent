@@ -29,11 +29,13 @@ const API = (() => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
     try {
+      const token = localStorage.getItem('sg_token');
       const res = await fetch(BASE + path, {
         method,
         headers: {
           Accept: 'application/json',
           ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+          ...(token ? { Authorization: 'Bearer ' + token } : {}),
           ...headers,
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -260,7 +262,21 @@ const API = (() => {
     },
     async toggleFavorite(productId) {
       const r = await request('/favorites/' + productId + '/toggle', { method: 'POST' });
-      return !!(r && (r.favorited ?? r.fav));
+      return !!(r && (r.favorited ?? r.favorite ?? r.favourite ?? r.fav));
+    },
+
+    /* 登录 / 注册 */
+    async login(phone, password) {
+      return request('/auth/login', { method: 'POST', body: { phone, password } });
+    },
+    async register(phone, password, nickname) {
+      return request('/auth/register', { method: 'POST', body: { phone, password, nickname } });
+    },
+    async getMe() {
+      return request('/auth/me');
+    },
+    async logout() {
+      return request('/auth/logout', { method: 'POST' });
     },
   };
 })();

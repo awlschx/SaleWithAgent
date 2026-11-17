@@ -19,6 +19,7 @@ Comps.Checkout = {
       try { await this._submit(); } finally { this.busy = false; }
     },
     async _submit() {
+      if (!Auth.require()) return;
       const a = Store.addrs.find(x => x.id === this.aid);
       if (!a) return toast('请先选择收货地址');
       const fromCart = !!Store.co.fromCart;

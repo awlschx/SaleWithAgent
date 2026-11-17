@@ -11,8 +11,8 @@ Comps.Detail = {
   },
   watch: { p: { immediate: true, handler(p) { this.vi = 0; this.qty = 1; this.tab = 'info'; this.sel = OPT[p.c][0]; } } },
   methods: {
-    add() { Cart.add(this.p.id, this.qty, this.sel); toast('已加入购物车'); },
-    buy() { Store.co = { items: [{ id: this.p.id, spec: this.sel, qty: this.qty }], fromCart: false }; },
+    add() { if (!Auth.require()) return; Cart.add(this.p.id, this.qty, this.sel); toast('已加入购物车'); },
+    buy() { if (!Auth.require()) return; Store.co = { items: [{ id: this.p.id, spec: this.sel, qty: this.qty }], fromCart: false }; },
     fav() { Fav.toggle(this.p.id); },
   },
   template: `<div class="w pg"><div class="box">
