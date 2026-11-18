@@ -11,12 +11,12 @@
 <div id="app">
   <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
   <header class="w hd">
-    <div class="logo" @click="reset">拾光<b>百货</b></div>
+    <div class="logo" role="button" tabindex="0" aria-label="返回首页" @click="reset" @keyup.enter="reset"><span>拾光<b>百货</b></span><small>SHIGUANG SELECT</small></div>
     <div class="sb">
-      <form @submit.prevent="search"><input v-model.trim="q" placeholder="搜索商品，试试“耳机”"><button type="submit">搜索</button></form>
+      <form @submit.prevent="search" role="search"><input v-model.trim="q" aria-label="搜索商品" placeholder="搜索商品，试试“耳机”"><button type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>搜索</button></form>
       <div class="hot"><a v-for="h in hots" :key="h" @click="hot(h)">{{ h }}</a></div>
     </div>
-    <button class="cartbtn" @click="S.cartOpen=true">我的购物车<i v-if="Cart.count()">{{ Cart.count() }}</i></button>
+    <button class="cartbtn" @click="S.cartOpen=true" aria-label="打开我的购物车"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L20.5 7H6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>我的购物车<i v-if="Cart.count()">{{ Cart.count() }}</i></button>
   </header>
   <component :is="view"></component>
   <footer class="foot">拾光百货 · 演示站点，商品、评价与订单均为模拟数据</footer>

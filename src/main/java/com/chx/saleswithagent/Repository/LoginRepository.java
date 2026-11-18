@@ -35,10 +35,10 @@ public class LoginRepository {
         String password = passwordEncoder.encode(registerDTO.getPassword());
         String insertSql = "INSERT INTO users (phone,password,nickname) VALUES (?,?,?) ";
         if(registerDTO.getNickname() == null){
-            registerDTO.setNickname("妮露"+ System.currentTimeMillis());
+            registerDTO.setNickname("妮露"+ Long.toString(System.currentTimeMillis()));
         }
         jdbc.update(insertSql, registerDTO.getPhone(), password, registerDTO.getNickname());
         UserVO userVO = new UserVO();
-
+        return null;
     }
 }
