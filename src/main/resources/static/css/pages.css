@@ -186,3 +186,72 @@
   .cp:hover, .ad:hover, .gth .th:hover, .chips a:hover, .ob button:hover { transform: none; }
   .cp:active, .ad:active, .od .oi:active { background: var(--pr2); }
 }
+
+/* ===== 动效层：按钮弹簧反馈 / 卡片模糊显现 / 品牌流光 ===== */
+:root {
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* 悬停：统一 0.3s 缓出（按钮、导航、列表项、卡片） */
+.sb form button, .cartbtn, .add, .more, .b1, .b2, .go, .sl button,
+.opts button, .stp button, .cp .cr button, .ob button, .dh > button, .x, .ar, .fav,
+.tabs a, .chips a, .cats li, .hot a, .top a, .me .q a, .me .u small a, .ad .ab a,
+.card, .fi, .cp, .ad, .od, .gth .th, .rv .up, .oi, .co .ai {
+  transition-duration: .3s;
+  transition-timing-function: var(--ease-out);
+}
+
+/* 按下：弹簧曲线，带轻微回弹 */
+.sb form button:active, .cartbtn:active, .add:active, .more:active,
+.b1:active, .b2:active, .sl button:active,
+.opts button:active, .cp .cr button:active, .ob button:active,
+.dh > button:active, .x:active, .fav:active {
+  transform: scale(.94);
+  transition: transform .3s var(--spring);
+}
+.go:active:not(:disabled) { transform: scale(.94); transition: transform .3s var(--spring); }
+.stp button:active { transform: scale(.9); transition: transform .3s var(--spring); }
+.ar:active { transform: translateY(-50%) scale(.94); transition: transform .3s var(--spring); }
+
+/* 卡片入场：图片与标题从模糊到清晰，兄弟卡片依次错峰 */
+@keyframes blur-in {
+  from { opacity: 0; filter: blur(12px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.grid .card .th, .flash .fi .th { animation: blur-in .55s var(--ease-out) both; }
+.grid .card .nm, .flash .fi .nm { animation: blur-in .55s var(--ease-out) .12s both; }
+.grid .card:nth-child(2) .th, .flash .fi:nth-child(2) .th { animation-delay: .05s; }
+.grid .card:nth-child(2) .nm, .flash .fi:nth-child(2) .nm { animation-delay: .17s; }
+.grid .card:nth-child(3) .th, .flash .fi:nth-child(3) .th { animation-delay: .1s; }
+.grid .card:nth-child(3) .nm, .flash .fi:nth-child(3) .nm { animation-delay: .22s; }
+.grid .card:nth-child(4) .th, .flash .fi:nth-child(4) .th { animation-delay: .15s; }
+.grid .card:nth-child(4) .nm, .flash .fi:nth-child(4) .nm { animation-delay: .27s; }
+.grid .card:nth-child(5) .th, .flash .fi:nth-child(5) .th { animation-delay: .2s; }
+.grid .card:nth-child(5) .nm, .flash .fi:nth-child(5) .nm { animation-delay: .32s; }
+.grid .card:nth-child(6) .th { animation-delay: .25s; }
+.grid .card:nth-child(6) .nm { animation-delay: .37s; }
+.grid .card:nth-child(7) .th { animation-delay: .3s; }
+.grid .card:nth-child(7) .nm { animation-delay: .42s; }
+.grid .card:nth-child(8) .th { animation-delay: .35s; }
+.grid .card:nth-child(8) .nm { animation-delay: .47s; }
+
+/* 品牌标签：流光高光周期性扫过 */
+.logo > span { position: relative; overflow: hidden; }
+.logo > span::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -50%;
+  width: 38%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: logo-sheen 3.8s var(--ease-out) infinite;
+}
+@keyframes logo-sheen {
+  0% { left: -50%; }
+  55% { left: 130%; }
+  100% { left: 130%; }
+}
