@@ -1,26 +1,22 @@
 package com.chx.saleswithagent.Controller;
 
-import com.chx.saleswithagent.Common.CurrentUser;
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.DTO.AllSelectedDTO;
 import com.chx.saleswithagent.DTO.CartItemDTO;
 import com.chx.saleswithagent.DTO.CartItemUpdateDTO;
 import com.chx.saleswithagent.Service.CartService;
-import com.chx.saleswithagent.VO.CartItemVO;
 import com.chx.saleswithagent.VO.CartVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
-
+    Long userId = UserContext.getUserId();
     //注入cartservice
     @Resource
     private CartService cartService;
@@ -28,7 +24,8 @@ public class CartController {
     @GetMapping
     public Result<CartVO> list(){
         log.info("获取购物车数据");
-        return Result.ok(cartService.buildCart(CurrentUser.id()));
+
+        return Result.ok(cartService.buildCart(userId));
     }
     /*
     *添加商品进购物车
@@ -37,7 +34,6 @@ public class CartController {
     @PostMapping("/items")
     public Result<CartVO> addItem(@Valid @RequestBody CartItemDTO cartItemDTO){
         log.info("添加购物车数据");
-        Long userId = CurrentUser.id();
         cartService.addItem(userId, cartItemDTO);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -49,7 +45,6 @@ public class CartController {
     public Result<CartVO> updateItem(@PathVariable Long itemId,
                                      @Valid @RequestBody CartItemUpdateDTO dto){
         log.info("更新购物车数据");
-        Long userId = CurrentUser.id();
         cartService.updateItem(userId, itemId, dto);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -60,7 +55,6 @@ public class CartController {
     @DeleteMapping("/items/{itemId}")
     public Result<CartVO> deleteItem(@PathVariable Long itemId){
         log.info("删除商品");
-        Long userId = CurrentUser.id();
         cartService.deleteItem(userId, itemId);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -70,7 +64,6 @@ public class CartController {
      */
     @PostMapping("/reorder/{orderNo}")
     public Result reorder(@PathVariable String orderNo){
-        Long userId = CurrentUser.id();
         return Result.ok(cartService.reorder(orderNo,userId));
     }
     /*
@@ -80,7 +73,7 @@ public class CartController {
      */
     @GetMapping("/count")
     public Result count(){
-        return Result.ok(cartService.count(CurrentUser.id()));
+        return Result.ok(cartService.count(userId));
     }
     /*
     *处理购物车处点击全选
@@ -88,7 +81,6 @@ public class CartController {
      */
     @PutMapping("/selected")
     public Result<CartVO> allSelected(@RequestBody AllSelectedDTO allSelectedDTO){
-        Long userId = CurrentUser.id();
         cartService.allSelected(userId, allSelectedDTO);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -98,7 +90,6 @@ public class CartController {
      */
     @DeleteMapping("/selected")
     public Result<CartVO> deleteSelected(){
-        Long userId = CurrentUser.id();
         cartService.deleteSelected(userId);
         return Result.ok(cartService.buildCart(userId));
     }

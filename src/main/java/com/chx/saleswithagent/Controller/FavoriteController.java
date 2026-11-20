@@ -1,7 +1,7 @@
 package com.chx.saleswithagent.Controller;
 
 
-import com.chx.saleswithagent.Common.CurrentUser;
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.FavoriteService;
 import jakarta.annotation.Resource;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/favorites")
 public class FavoriteController {
+    Long userId = UserContext.getUserId();
     @Resource
     private FavoriteService favoriteService;
     /*
@@ -20,7 +21,6 @@ public class FavoriteController {
      */
     @GetMapping
     public Result getFavourite(){
-        Long userId = CurrentUser.id();
         return Result.ok(favoriteService.getFavorite(userId));
     }
 
@@ -30,7 +30,6 @@ public class FavoriteController {
      */
     @PostMapping("/{productId}/toggle")
     public Result toggleFavorite(@PathVariable Long productId){
-        Long userId = CurrentUser.id();
         return Result.ok(favoriteService.toggleFavorite(userId,productId));
     }
 }

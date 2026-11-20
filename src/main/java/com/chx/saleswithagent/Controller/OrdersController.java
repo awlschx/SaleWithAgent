@@ -1,21 +1,20 @@
 package com.chx.saleswithagent.Controller;
 
-import com.chx.saleswithagent.Common.CurrentUser;
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.OrdersDTO;
-import com.chx.saleswithagent.Repository.CouponsRepository;
-import com.chx.saleswithagent.Repository.OrdersRepository;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.CouponsService;
 import com.chx.saleswithagent.Service.OrdersService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/orders")
 public class OrdersController {
+    Long userId = UserContext.getUserId();
+
     @Resource
     private OrdersService ordersService;
 
@@ -28,7 +27,6 @@ public class OrdersController {
      */
     @GetMapping
     public Result getOrders(@RequestParam(defaultValue = "all") String status){
-       Long userId = CurrentUser.id();
         return Result.ok(ordersService.getOrders(userId,status));
     }
     /*
@@ -39,7 +37,6 @@ public class OrdersController {
     public Result addOrders(@RequestBody OrdersDTO ordersDTO){
         log.info("添加订单");
         log.info(ordersDTO.toString());
-        Long userId = CurrentUser.id();
         return Result.ok(ordersService.addOrders(ordersDTO,userId));
     }
 
@@ -49,6 +46,7 @@ public class OrdersController {
      */
     @PostMapping("/{orderNo}/cancel")
     public Result cancelOrders(@PathVariable String orderNo){
+
         return Result.ok(ordersService.cancelOrders(orderNo));
     }
     /*
@@ -57,6 +55,7 @@ public class OrdersController {
      */
     @PostMapping("/{orderNo}/ship")
     public Result shipOrders(@PathVariable String orderNo){
+
         return Result.ok(ordersService.shipOrders(orderNo));
     }
 

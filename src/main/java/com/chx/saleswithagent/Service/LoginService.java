@@ -6,4 +6,6 @@ import com.chx.saleswithagent.VO.UserVO;
 
 public interface LoginService {
     UserVO register(RegisterDTO registerDTO);
+
+    UserVO login(LoginDTO loginDTO);
 }

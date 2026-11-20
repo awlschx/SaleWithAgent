@@ -11,4 +11,5 @@ import lombok.Data;
 public class UserVO {
     String token;
     LoginVO login;
+
 }

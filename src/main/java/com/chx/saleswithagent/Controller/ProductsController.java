@@ -1,5 +1,6 @@
 package com.chx.saleswithagent.Controller;
 
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.ProductsService;
 import com.chx.saleswithagent.VO.ProductsVO;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductsController {
+    Long userId = UserContext.getUserId();
     @Resource
     private ProductsService productsService;
     /*

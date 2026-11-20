@@ -1,5 +1,6 @@
 package com.chx.saleswithagent.Controller;
 
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.LoginDTO;
 import com.chx.saleswithagent.DTO.RegisterDTO;
 import com.chx.saleswithagent.Result.Result;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class LoginController {
+    Long userId = UserContext.getUserId();
     @Resource
     private LoginService loginService;
 
@@ -21,6 +23,15 @@ public class LoginController {
      */
     @PostMapping("/register")
     public Result register(@RequestBody RegisterDTO registerDTO){
+        log.info("注册功能");
         return Result.ok(loginService.register(registerDTO));
+    }
+    /*
+    *登录功能的实现
+     */
+    @PostMapping("/login")
+    public Result login(@RequestBody LoginDTO loginDTO){
+        log.info("登录功能");
+        return Result.ok(loginService.login(loginDTO));
     }
 }

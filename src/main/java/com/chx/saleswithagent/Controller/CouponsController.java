@@ -1,8 +1,7 @@
 package com.chx.saleswithagent.Controller;
 
-import com.chx.saleswithagent.Common.CurrentUser;
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
-import com.chx.saleswithagent.Service.AddressService;
 import com.chx.saleswithagent.Service.CouponsService;
 import jakarta.annotation.Resource;
 import lombok.Data;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/coupons")
 public class CouponsController {
+    Long userId = UserContext.getUserId();
     @Resource
     private CouponsService couponsService;
 
@@ -31,7 +31,6 @@ public class CouponsController {
      */
     @GetMapping("/mine")
     public Result mineCoupons(@RequestParam(defaultValue="all") String status){
-        Long userId = CurrentUser.id();
         return Result.ok(couponsService.mineCoupons(userId,status));
     }
     /*
@@ -41,7 +40,6 @@ public class CouponsController {
      */
     @PostMapping("/{templateId}/claim")
     public Result clickCoupons(@PathVariable Long templateId){
-        Long userId = CurrentUser.id();
         return Result.ok(couponsService.clickCoupons(userId,templateId));
     }
     /*

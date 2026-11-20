@@ -1,18 +1,16 @@
 package com.chx.saleswithagent.Controller;
 
-import com.chx.saleswithagent.Common.CurrentUser;
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.AddressDTO;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.AddressService;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/addresses")
 public class AddressController {
+    Long userId = UserContext.getUserId();
     //注入service
     @Resource
     private AddressService addressService;
@@ -22,7 +20,8 @@ public class AddressController {
      */
     @PostMapping
     public Result addAddress(@RequestBody AddressDTO addressDTO){
-        addressDTO.setUserId(CurrentUser.id());
+
+        addressDTO.setUserId(userId);
         return Result.ok(addressService.addAddress(addressDTO));
     }
 
@@ -32,7 +31,6 @@ public class AddressController {
      */
     @GetMapping
     public Result getAddress(){
-        Long userId = CurrentUser.id();
         return Result.ok(addressService.getAddress(userId));
     }
     /*
