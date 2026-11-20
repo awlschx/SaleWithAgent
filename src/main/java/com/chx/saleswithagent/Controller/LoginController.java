@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class LoginController {
-    Long userId = UserContext.getUserId();
+
     @Resource
     private LoginService loginService;
 

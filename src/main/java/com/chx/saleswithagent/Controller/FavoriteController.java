@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/favorites")
 public class FavoriteController {
-    Long userId = UserContext.getUserId();
+
     @Resource
     private FavoriteService favoriteService;
     /*
@@ -21,6 +21,7 @@ public class FavoriteController {
      */
     @GetMapping
     public Result getFavourite(){
+        Long userId = UserContext.getUserId();
         return Result.ok(favoriteService.getFavorite(userId));
     }
 
@@ -30,6 +31,7 @@ public class FavoriteController {
      */
     @PostMapping("/{productId}/toggle")
     public Result toggleFavorite(@PathVariable Long productId){
+        Long userId = UserContext.getUserId();
         return Result.ok(favoriteService.toggleFavorite(userId,productId));
     }
 }

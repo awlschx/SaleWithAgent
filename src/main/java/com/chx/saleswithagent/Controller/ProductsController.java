@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductsController {
-    Long userId = UserContext.getUserId();
+
     @Resource
     private ProductsService productsService;
     /*
@@ -31,6 +31,7 @@ public class ProductsController {
     @GetMapping
     public Result<List<ProductsVO>> ListProducts(){
         log.info("获取products");
+        Long userId = UserContext.getUserId();
         return Result.ok(productsService.ListProducts());
     }
 }

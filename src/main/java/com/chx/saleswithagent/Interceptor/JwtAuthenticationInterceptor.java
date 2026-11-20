@@ -1,6 +1,7 @@
 package com.chx.saleswithagent.Interceptor;
 
 
+import ch.qos.logback.classic.Logger;
 import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Security.JwtTokenService;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -17,6 +19,7 @@ import java.io.IOException;
 
 @Component
 @Data
+@Slf4j
 public class JwtAuthenticationInterceptor implements HandlerInterceptor {
     private final JwtTokenService jwtTokenService;
     private final ObjectMapper objectMapper;
@@ -53,6 +56,7 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
             //校验
             Long userId = jwtTokenService.parseUserId(authorization);
             UserContext.setUserId(userId);
+            log.info("userId{}",userId);
             return true;
         }catch (Exception e){
             writeErrorResponse(response,e.getMessage());

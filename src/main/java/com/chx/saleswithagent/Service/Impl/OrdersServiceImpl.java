@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Resource
     private OrdersRepository ordersRepository;
     @Override
+    @Transactional
     public List<OrdersVO> getOrders(Long userId, String status) {
         log.info("status{}",status);
         List<OrdersEntity> orders = ordersRepository.getOrders(userId, status);
@@ -56,17 +58,20 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
+    @Transactional
     public OrdersVO addOrders(OrdersDTO ordersDTO, Long userId) {
        return ordersRepository.addOrders(ordersDTO,userId);
 
     }
 
     @Override
+    @Transactional
     public OrdersVO cancelOrders(String orderNo) {
         return ordersRepository.cancelOrders(orderNo);
     }
 
     @Override
+    @Transactional
     public OrdersVO shipOrders(String orderNo) {
         //模拟发货要改orders表，把status改为已发货
         log.info("准备发货");
@@ -74,6 +79,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
+    @Transactional
     public OrdersVO receiveOrders(String orderNo) {
         log.info("确认收货");
         return ordersRepository.receiveOrders(orderNo);

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/addresses")
 public class AddressController {
-    Long userId = UserContext.getUserId();
+
     //注入service
     @Resource
     private AddressService addressService;
@@ -20,7 +20,7 @@ public class AddressController {
      */
     @PostMapping
     public Result addAddress(@RequestBody AddressDTO addressDTO){
-
+        Long userId = UserContext.getUserId();
         addressDTO.setUserId(userId);
         return Result.ok(addressService.addAddress(addressDTO));
     }
@@ -30,7 +30,7 @@ public class AddressController {
     *
      */
     @GetMapping
-    public Result getAddress(){
+    public Result getAddress(){Long userId = UserContext.getUserId();
         return Result.ok(addressService.getAddress(userId));
     }
     /*

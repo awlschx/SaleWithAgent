@@ -8,6 +8,7 @@ import com.chx.saleswithagent.VO.UserCouponsVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class CouponsServiceImpl implements CouponsService {
     @Resource
     private CouponsRepository couponsRepository;
     @Override
+    @Transactional
     public List<CouponsTemplateVO> listCoupons() {
         List<CouponsTemplateEntity> e = couponsRepository.listCoupons();
         List<CouponsTemplateVO> list = new ArrayList<>();
@@ -29,17 +31,20 @@ public class CouponsServiceImpl implements CouponsService {
     }
 
     @Override
+    @Transactional
     public List<UserCouponsVO> mineCoupons(Long userId,String status) {
        return  couponsRepository.mineCoupons(userId,status);
 
     }
 
     @Override
+    @Transactional
     public UserCouponsVO clickCoupons(Long userId, Long templateId) {
         return couponsRepository.clickCoupons(userId,templateId);
     }
 
     @Override
+    @Transactional
     public Boolean deleteCoupons(Long userCouponsId) {
         return couponsRepository.deleteCoupons(userCouponsId);
     }

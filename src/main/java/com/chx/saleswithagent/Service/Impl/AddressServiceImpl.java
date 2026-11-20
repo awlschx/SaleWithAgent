@@ -8,6 +8,7 @@ import com.chx.saleswithagent.Service.AddressService;
 import com.chx.saleswithagent.VO.AddressVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public AddressVO addAddress(AddressDTO addressDTO) {
             Long res = addressRepository.addAddress(addressDTO);
             if( res > 0){
@@ -38,6 +40,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public List<AddressVO> getAddress(Long userId) {
         List<AddressVO> vo = new ArrayList<>();
         List<AddressEntity> e = new ArrayList<>();
@@ -56,6 +59,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public AddressVO updateAddress(Long id, AddressDTO addressDTO) {
         AddressEntity e = addressRepository.updateAddress(id, addressDTO);
         AddressVO v = new AddressVO();
@@ -69,6 +73,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteAddressById(Long id) {
         return addressRepository.deleteAddressById(id) > 0;
     }

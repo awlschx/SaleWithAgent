@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/orders")
 public class OrdersController {
-    Long userId = UserContext.getUserId();
+
 
     @Resource
     private OrdersService ordersService;
@@ -27,6 +27,7 @@ public class OrdersController {
      */
     @GetMapping
     public Result getOrders(@RequestParam(defaultValue = "all") String status){
+        Long userId = UserContext.getUserId();
         return Result.ok(ordersService.getOrders(userId,status));
     }
     /*
@@ -37,6 +38,7 @@ public class OrdersController {
     public Result addOrders(@RequestBody OrdersDTO ordersDTO){
         log.info("添加订单");
         log.info(ordersDTO.toString());
+        Long userId = UserContext.getUserId();
         return Result.ok(ordersService.addOrders(ordersDTO,userId));
     }
 

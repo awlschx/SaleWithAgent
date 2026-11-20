@@ -1,5 +1,6 @@
 package com.chx.saleswithagent.Security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -50,5 +51,14 @@ public class JwtTokenService {
                     .getPayload()//token分为header，payload，signature
                     .getSubject();//获取生成token时声明的subject
             return Long.parseLong(userId);
+    }
+
+    public Claims test(String token){
+        Claims claims = Jwts.parser()
+                .verifyWith(secret)            // ← 关键：配置验签密钥
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return  claims;
     }
 }

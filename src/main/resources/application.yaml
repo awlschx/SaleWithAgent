@@ -11,4 +11,4 @@ spring:
 app:
   jwt:
     secret: "${JWT_SECRET:vIug98JVSsiSnLWva30E4rpzvziBYqJV20LsXUtofws=}"
-    ttl-seconds: 7200
+    ttl-seconds: 7200000

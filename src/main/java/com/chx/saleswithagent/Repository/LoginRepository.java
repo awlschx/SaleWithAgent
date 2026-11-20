@@ -1,11 +1,16 @@
 package com.chx.saleswithagent.Repository;
 
 
+import com.chx.saleswithagent.Common.BizException;
+import com.chx.saleswithagent.Constant.ErrorCode;
 import com.chx.saleswithagent.DTO.LoginDTO;
 import com.chx.saleswithagent.DTO.RegisterDTO;
+import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Security.JwtTokenService;
 import com.chx.saleswithagent.VO.LoginVO;
 import com.chx.saleswithagent.VO.UserVO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Repository
 @Slf4j
@@ -38,7 +44,8 @@ public class LoginRepository {
         Boolean res = jdbc.queryForObject(existSql, Boolean.class,registerDTO.getPhone());
         log.info(String.valueOf(res));
         if (Boolean.TRUE.equals(res)){
-            return null;
+            throw new BizException(ErrorCode.PHONE_EXIST);
+
         }
         String password = passwordEncoder.encode(registerDTO.getPassword());
         String insertSql = "INSERT INTO users (phone,password,nickname) VALUES (?,?,?) ";
@@ -77,7 +84,7 @@ public class LoginRepository {
         Boolean res = jdbc.queryForObject(existSql, Boolean.class,loginDTO.getPhone());
         UserVO userVO = new UserVO();
         if ( !Boolean.TRUE.equals(res) ) {
-            return null;
+            throw new BizException(ErrorCode.USER_EXIST);
         }
 
         LoginVO loginVO = jdbc.queryForObject(sql,
@@ -90,6 +97,14 @@ public class LoginRepository {
                 ,loginDTO.getPhone());
         userVO.setToken(loginDTO.getToken());
         String token = jwtTokenService.generateToken(loginVO.getId());
+        Claims claims = jwtTokenService.test(token);
+
+        Date expiration = claims.getExpiration();      // 过期时间
+        log.info(String.valueOf(expiration));
+        Date issuedAt   = claims.getIssuedAt();        // 签发时间
+        log.info(String.valueOf(issuedAt));
+        long remainMs   = expiration.getTime() - System.currentTimeMillis();
+        log.info(String.valueOf(remainMs));
         userVO.setLogin(loginVO);
         userVO.setToken(token);
         return userVO;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/coupons")
 public class CouponsController {
-    Long userId = UserContext.getUserId();
+
     @Resource
     private CouponsService couponsService;
 
@@ -31,6 +31,7 @@ public class CouponsController {
      */
     @GetMapping("/mine")
     public Result mineCoupons(@RequestParam(defaultValue="all") String status){
+        Long userId = UserContext.getUserId();
         return Result.ok(couponsService.mineCoupons(userId,status));
     }
     /*
@@ -40,6 +41,8 @@ public class CouponsController {
      */
     @PostMapping("/{templateId}/claim")
     public Result clickCoupons(@PathVariable Long templateId){
+        Long userId = UserContext.getUserId();
+        log.info("userId{}",userId);
         return Result.ok(couponsService.clickCoupons(userId,templateId));
     }
     /*

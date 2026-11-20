@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
-    Long userId = UserContext.getUserId();
+
     //注入cartservice
     @Resource
     private CartService cartService;
@@ -24,7 +24,7 @@ public class CartController {
     @GetMapping
     public Result<CartVO> list(){
         log.info("获取购物车数据");
-
+        Long userId = UserContext.getUserId();
         return Result.ok(cartService.buildCart(userId));
     }
     /*
@@ -34,6 +34,7 @@ public class CartController {
     @PostMapping("/items")
     public Result<CartVO> addItem(@Valid @RequestBody CartItemDTO cartItemDTO){
         log.info("添加购物车数据");
+        Long userId = UserContext.getUserId();
         cartService.addItem(userId, cartItemDTO);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -45,6 +46,7 @@ public class CartController {
     public Result<CartVO> updateItem(@PathVariable Long itemId,
                                      @Valid @RequestBody CartItemUpdateDTO dto){
         log.info("更新购物车数据");
+        Long userId = UserContext.getUserId();
         cartService.updateItem(userId, itemId, dto);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -55,6 +57,7 @@ public class CartController {
     @DeleteMapping("/items/{itemId}")
     public Result<CartVO> deleteItem(@PathVariable Long itemId){
         log.info("删除商品");
+        Long userId = UserContext.getUserId();
         cartService.deleteItem(userId, itemId);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -64,6 +67,8 @@ public class CartController {
      */
     @PostMapping("/reorder/{orderNo}")
     public Result reorder(@PathVariable String orderNo){
+
+        Long userId = UserContext.getUserId();
         return Result.ok(cartService.reorder(orderNo,userId));
     }
     /*
@@ -73,6 +78,7 @@ public class CartController {
      */
     @GetMapping("/count")
     public Result count(){
+        Long userId = UserContext.getUserId();
         return Result.ok(cartService.count(userId));
     }
     /*
@@ -81,6 +87,7 @@ public class CartController {
      */
     @PutMapping("/selected")
     public Result<CartVO> allSelected(@RequestBody AllSelectedDTO allSelectedDTO){
+        Long userId = UserContext.getUserId();
         cartService.allSelected(userId, allSelectedDTO);
         return Result.ok(cartService.buildCart(userId));
     }
@@ -90,6 +97,7 @@ public class CartController {
      */
     @DeleteMapping("/selected")
     public Result<CartVO> deleteSelected(){
+        Long userId = UserContext.getUserId();
         cartService.deleteSelected(userId);
         return Result.ok(cartService.buildCart(userId));
     }
