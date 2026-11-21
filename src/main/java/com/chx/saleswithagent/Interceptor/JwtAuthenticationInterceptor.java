@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Security.JwtTokenService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -49,12 +50,18 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
         if("OPTIONS".equals(request.getMethod())){
             return  true;
         }
-       authorization = authorization.substring("Bearer ".length()).trim();
+        authorization = authorization.substring("Bearer ".length()).trim();
+        Claims claims = jwtTokenService.parseClaims(authorization);
+        String jti = claims.getId();
+        if(jwtTokenService.isBlacklist(jti)){
+            return false;
+        }
+
 
         //解析token
         try{
             //校验
-            Long userId = jwtTokenService.parseUserId(authorization);
+            Long userId = Long.valueOf(claims.getSubject());
             UserContext.setUserId(userId);
             log.info("userId{}",userId);
             return true;

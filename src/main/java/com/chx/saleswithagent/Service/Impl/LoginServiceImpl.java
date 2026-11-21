@@ -10,6 +10,9 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @Slf4j
 public class LoginServiceImpl implements LoginService {
@@ -24,5 +27,14 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public UserVO login(LoginDTO loginDTO) {
         return loginRepository.login(loginDTO);
+    }
+
+    @Override
+    public Map logout(String authorization) {
+        String token = authorization.substring(7);
+        boolean res = loginRepository.logout(token);
+        Map<String ,Boolean> map = new HashMap<>();
+        map.put("ok",res);
+        return map;
     }
 }

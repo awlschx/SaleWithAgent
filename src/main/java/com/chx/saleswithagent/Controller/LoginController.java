@@ -34,4 +34,12 @@ public class LoginController {
         log.info("登录功能");
         return Result.ok(loginService.login(loginDTO));
     }
+    /*
+    *登出功能的实现
+     */
+    @PostMapping("/logout")
+    public Result logout(@RequestHeader("Authorization") String authorization){
+        log.info("登出功能");
+        return Result.ok(loginService.logout(authorization));
+    }
 }

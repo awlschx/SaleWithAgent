@@ -109,4 +109,12 @@ public class LoginRepository {
         userVO.setToken(token);
         return userVO;
     }
+
+    /*
+    *登出功能
+     */
+    public boolean logout(String token) {
+        jwtTokenService.blacklist(token);
+        return true;
+    }
 }
