@@ -377,21 +377,31 @@ const Auth = {
     Store.coupons = [];
     await bootstrap();
   },
-  logout() {
-    API.logout().catch(() => {});
-    Store.token = '';
-    Store.user = null;
-    Store.cart = [];
-    Store.favs = [];
-    Store.orders = [];
-    Store.addrs = [];
-    Store.coupons = [];
+  async logout() {
+    // 退出时的本地清空不是用户删除商品，取消并暂停购物车同步
+    clearTimeout(Cart._timer);
+    Cart._applying = true;
     try {
-      localStorage.removeItem('sg_token');
-      localStorage.removeItem('sg_user');
-    } catch (e) {}
-    go('#/');
-    toast('已退出登录');
+      await API.logout();
+    } catch (e) {
+      // 后端退出失败时仍清理本地登录状态
+    } finally {
+      Store.token = '';
+      Store.user = null;
+      Store.cart = [];
+      Store.favs = [];
+      Store.orders = [];
+      Store.addrs = [];
+      Store.coupons = [];
+      Cart.snapshot();
+      try {
+        localStorage.removeItem('sg_token');
+        localStorage.removeItem('sg_user');
+      } catch (e) {}
+      go('#/');
+      toast('已退出登录');
+      Vue.nextTick(() => { Cart._applying = false; });
+    }
   },
 };
 

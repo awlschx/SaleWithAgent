@@ -97,7 +97,7 @@ public class LoginRepository {
                 ,loginDTO.getPhone());
         userVO.setToken(loginDTO.getToken());
         String token = jwtTokenService.generateToken(loginVO.getId());
-        Claims claims = jwtTokenService.test(token);
+        Claims claims = jwtTokenService.parseClaims(token);
 
         Date expiration = claims.getExpiration();      // 过期时间
         log.info(String.valueOf(expiration));
