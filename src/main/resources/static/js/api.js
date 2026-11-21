@@ -1,21 +1,21 @@
-/* 数据接口层：所有后端请求集中在这里，组件不直接 fetch。
-   接口契约见 docs/API-接口清单与后端开发指南.md。
-   兼容两种响应：统一响应体 { code, message, data } 与现有的裸 JSON。
-   组件统一使用前端字段（n/c/p/o/s/h/f/pct、qty、on、def…），映射在本文件完成。 */
-const idempotencyKey = () => 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+/* API 边界：只负责传输、错误规范化和 DTO → 视图模型映射，不实现业务规则。 */
+const idempotencyKey = () => globalThis.crypto?.randomUUID?.()
+  || 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 
 const API = (() => {
   const BASE = '/api';
-  const TIMEOUT = 4000;
-
-  const num = v => (v == null || v === '' ? 0 : Number(v));
+  const TIMEOUT = 10000;
+  const num = (v, fallback = 0) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  };
+  const optionalNum = v => v == null || v === '' ? null : num(v, null);
   const toMs = v => {
-    if (v == null || v === '') return Date.now();
+    if (v == null || v === '') return 0;
     if (typeof v === 'number') return v < 1e12 ? v * 1000 : v;
     const t = Date.parse(v);
-    return Number.isNaN(t) ? Date.now() : t;
+    return Number.isNaN(t) ? 0 : t;
   };
-
   const qs = params => {
     const usp = new URLSearchParams();
     Object.entries(params || {}).forEach(([k, v]) => {
@@ -29,9 +29,11 @@ const API = (() => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
     try {
-      const token = localStorage.getItem('sg_token');
+      let token = '';
+      try { token = sessionStorage.getItem('sg_token') || ''; } catch (e) {}
       const res = await fetch(BASE + path, {
         method,
+        credentials: 'same-origin',
         headers: {
           Accept: 'application/json',
           ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
@@ -50,55 +52,59 @@ const API = (() => {
         const err = new Error((json && typeof json === 'object' && (json.message || json.error)) || ('HTTP ' + res.status));
         err.status = res.status;
         err.code = json && typeof json === 'object' ? json.code : undefined;
+        if (res.status === 401 && !/^\/auth\/(login|register)$/.test(path) && typeof Auth !== 'undefined') {
+          Auth.onUnauthorized();
+        }
         throw err;
       }
-      // 统一响应体：code 0（文档）或 200（现有 Result.ok）都算成功
-      if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
+      if (json && typeof json === 'object' && 'code' in json) {
         if (json.code !== 0 && json.code !== 200) {
           const err = new Error(json.message || ('业务错误 ' + json.code));
           err.code = json.code;
+          err.status = res.status;
           throw err;
         }
         return json.data;
       }
       return json;
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('请求超时，请稍后重试');
+      throw e;
     } finally {
       clearTimeout(timer);
     }
   }
 
-  /* ---------- 后端字段 → 前端组件字段 ---------- */
   const mapProduct = p => ({
     id: p.id,
-    n: p.name,
-    c: p.category,
+    n: p.name ?? '',
+    c: p.category ?? '',
     p: num(p.price),
-    o: num(p.originalPrice),
+    o: optionalNum(p.originalPrice),
     s: num(p.sales),
-    h: p.hue,
-    f: num(p.flashPrice),
-    pct: p.flashPercent,
+    h: optionalNum(p.hue),
+    stock: optionalNum(p.stock),
+    status: p.status ?? '',
+    img: p.imageUrl ?? p.image ?? '',
+    freeShipping: !!p.freeShipping,
+    nextDay: !!p.nextDay,
+    f: optionalNum(p.flashPrice),
+    pct: optionalNum(p.flashPercent),
+    specs: Array.isArray(p.specs) ? p.specs.map(s => typeof s === 'string' ? s : (s.spec ?? s.name)).filter(Boolean) : [],
   });
-
   const mapAddress = a => ({
     id: a.id,
-    name: a.name,
-    phone: a.phone,
-    region: a.region,
-    detail: a.detail,
+    name: a.name ?? '',
+    phone: a.phone ?? '',
+    region: a.region ?? '',
+    detail: a.detail ?? '',
     def: !!(a.isDefault ?? a.def),
   });
-
   const mapAddressSnapshot = snap => {
-    if (!snap) return { name: '', phone: '', region: '', detail: '' };
+    if (!snap) return {};
     if (typeof snap === 'object') return mapAddress(snap);
-    try {
-      const o = JSON.parse(snap);
-      if (o && typeof o === 'object') return mapAddress(o);
-    } catch (e) {}
-    return { name: '', phone: '', region: String(snap), detail: '' };
+    try { return mapAddress(JSON.parse(snap)); } catch (e) { return { region: String(snap) }; }
   };
-
   const mapTemplate = c => ({
     id: c.id,
     t: c.title ?? c.t ?? c.name ?? '',
@@ -106,7 +112,6 @@ const API = (() => {
     off: num(c.offAmount ?? c.off),
     cat: c.category ?? c.cat ?? '',
   });
-
   const mapUserCoupon = c => {
     const tpl = c.template || {};
     return {
@@ -120,27 +125,26 @@ const API = (() => {
       exp: toMs(c.expireAt ?? c.exp),
     };
   };
-
-  const mapCart = c => {
-    const items = (c?.items || []).map(i => ({
+  const mapCart = c => ({
+    items: (c?.items || []).map(i => ({
       k: (i.productId ?? i.id) + '|' + i.spec,
       id: i.productId ?? i.id,
       rid: i.id,
-      spec: i.spec,
+      n: i.name ?? i.productName ?? '',
+      spec: i.spec ?? '',
       qty: num(i.quantity ?? i.qty),
       on: !!(i.selected ?? i.on),
-    }));
-    return {
-      items,
-      totalQuantity: c?.totalQuantity ?? items.reduce((a, i) => a + i.qty, 0),
-      selectedAmount: num(c?.selectedAmount),
-    };
-  };
-
+      price: optionalNum(i.price),
+      subtotal: optionalNum(i.subtotal),
+      stock: optionalNum(i.stock),
+    })),
+    totalQuantity: num(c?.totalQuantity),
+    selectedAmount: num(c?.selectedAmount),
+  });
   const mapOrder = o => ({
     no: o.orderNo ?? o.no,
     t: toMs(o.createdAt ?? o.t),
-    st: o.status ?? o.st,
+    st: o.status ?? o.st ?? '',
     addr: mapAddressSnapshot(o.addressSnapshot ?? o.addr),
     sub: num(o.itemAmount ?? o.sub),
     ship: num(o.shipFee ?? o.ship),
@@ -149,134 +153,80 @@ const API = (() => {
     cu: o.userCouponId ?? o.cu ?? null,
     items: (o.items || []).map(i => ({
       id: i.productId ?? i.id,
-      spec: i.spec,
+      n: i.productName ?? i.name ?? '',
+      spec: i.spec ?? '',
       qty: num(i.quantity ?? i.qty),
       price: num(i.price),
     })),
   });
+  const productPage = (data, params) => {
+    /* 数组响应 = 后端尚未实现分页/筛选参数，返回的是完整目录；
+       分页对象响应 = 服务端已执行查询，前端直接信任。 */
+    const plain = Array.isArray(data);
+    const rows = plain ? data : (data?.items || data?.records || data?.list || []);
+    return {
+      items: rows.map(mapProduct),
+      total: plain ? rows.length : num(data?.total, rows.length),
+      page: plain ? 1 : num(data?.page, params?.page || 1),
+      size: plain ? rows.length : num(data?.size, params?.size || rows.length),
+      serverPaged: !plain,
+    };
+  };
 
   return {
-    /* 商品 */
-    async getProducts(params) {
-      const list = await request('/products' + qs(params));
-      if (!Array.isArray(list)) throw new Error('商品接口返回格式不正确');
-      return list.map(mapProduct);
-    },
-    async getProduct(id) {
-      return mapProduct(await request('/products/' + id));
-    },
+    async getProducts(params = {}) { return productPage(await request('/products' + qs(params)), params); },
+    async getProduct(id) { return mapProduct(await request('/products/' + encodeURIComponent(id))); },
+    async getFlashProducts(params = {}) { return productPage(await request('/products/flash' + qs(params)), params); },
 
-    /* 购物车 */
     async getCart() { return mapCart(await request('/cart')); },
-    async getCartCount() { const r = await request('/cart/count'); return (r && r.count) || 0; },
-    async addCartItem(item) {
-      return mapCart(await request('/cart/items', { method: 'POST', body: item }));
-    },
-    /* PUT 全量更新：quantity 和 selected 必须同时传 */
+    async addCartItem(item) { return mapCart(await request('/cart/items', { method: 'POST', body: item })); },
     async updateCartItem(itemId, patch) {
       return mapCart(await request('/cart/items/' + itemId, {
-        method: 'PUT',
-        body: { quantity: patch.quantity, selected: patch.selected },
+        method: 'PUT', body: { quantity: patch.quantity, selected: patch.selected },
       }));
     },
-    async selectAllCart(selected) {
-      return mapCart(await request('/cart/selected', { method: 'PUT', body: { selected } }));
-    },
-    async removeCartItem(itemId) {
-      return mapCart(await request('/cart/items/' + itemId, { method: 'DELETE' }));
-    },
-    async removeSelectedCart() {
-      return mapCart(await request('/cart/selected', { method: 'DELETE' }));
-    },
-    async reorder(orderNo) {
-      return mapCart(await request('/cart/reorder/' + encodeURIComponent(orderNo), { method: 'POST' }));
-    },
+    async selectAllCart(selected) { return mapCart(await request('/cart/selected', { method: 'PUT', body: { selected } })); },
+    async removeCartItem(itemId) { return mapCart(await request('/cart/items/' + itemId, { method: 'DELETE' })); },
+    async removeSelectedCart() { return mapCart(await request('/cart/selected', { method: 'DELETE' })); },
+    async reorder(orderNo) { return mapCart(await request('/cart/reorder/' + encodeURIComponent(orderNo), { method: 'POST' })); },
 
-    /* 收货地址 */
-    async getAddresses() {
-      const list = await request('/addresses');
-      return (list || []).map(mapAddress);
-    },
+    async getAddresses() { return ((await request('/addresses')) || []).map(mapAddress); },
     async createAddress(a) {
-      return mapAddress(await request('/addresses', {
-        method: 'POST',
-        body: { name: a.name, phone: a.phone, region: a.region, detail: a.detail, isDefault: !!a.def },
-      }));
+      return mapAddress(await request('/addresses', { method: 'POST', body: {
+        name: a.name, phone: a.phone, region: a.region, detail: a.detail, isDefault: !!a.def,
+      } }));
     },
     async updateAddress(id, a) {
-      return mapAddress(await request('/addresses/' + id, {
-        method: 'PUT',
-        body: { name: a.name, phone: a.phone, region: a.region, detail: a.detail, isDefault: !!a.def },
-      }));
+      return mapAddress(await request('/addresses/' + id, { method: 'PUT', body: {
+        name: a.name, phone: a.phone, region: a.region, detail: a.detail, isDefault: !!a.def,
+      } }));
     },
-    async deleteAddress(id) {
-      return request('/addresses/' + id, { method: 'DELETE' });
-    },
-    async setDefaultAddress(id) {
-      const list = await request('/addresses/' + id + '/default', { method: 'PUT' });
-      return (list || []).map(mapAddress);
-    },
+    async deleteAddress(id) { return request('/addresses/' + id, { method: 'DELETE' }); },
+    async setDefaultAddress(id) { return ((await request('/addresses/' + id + '/default', { method: 'PUT' })) || []).map(mapAddress); },
 
-    /* 优惠券 */
-    async getAvailableCoupons() {
-      const list = await request('/coupons/available');
-      return (list || []).map(mapTemplate);
-    },
-    async getMyCoupons(status = 'all') {
-      const list = await request('/coupons/mine' + qs({ status }));
-      return (list || []).map(mapUserCoupon);
-    },
-    async claimCoupon(templateId) {
-      return mapUserCoupon(await request('/coupons/' + templateId + '/claim', { method: 'POST' }));
-    },
+    async getAvailableCoupons() { return ((await request('/coupons/available')) || []).map(mapTemplate); },
+    async getMyCoupons(status = 'all') { return ((await request('/coupons/mine' + qs({ status }))) || []).map(mapUserCoupon); },
+    async claimCoupon(templateId) { return mapUserCoupon(await request('/coupons/' + templateId + '/claim', { method: 'POST' })); },
 
-    /* 订单 */
-    async getOrders(status) {
-      const list = await request('/orders' + qs(status && status !== '全部' ? { status } : {}));
-      return (list || []).map(mapOrder);
-    },
-    async getOrder(orderNo) {
-      return mapOrder(await request('/orders/' + encodeURIComponent(orderNo)));
-    },
-    async createOrder(payload) {
+    async getOrders(status) { return ((await request('/orders' + qs(status && status !== '全部' ? { status } : {}))) || []).map(mapOrder); },
+    async previewOrder(payload) { return request('/orders/preview', { method: 'POST', body: payload }); },
+    async createOrder(payload, key) {
       return mapOrder(await request('/orders', {
-        method: 'POST',
-        body: payload,
-        headers: { 'Idempotency-Key': idempotencyKey() },
+        method: 'POST', body: payload, headers: { 'Idempotency-Key': key || idempotencyKey() },
       }));
     },
-    async cancelOrder(orderNo) {
-      return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/cancel', { method: 'POST' }));
-    },
-    async shipOrder(orderNo) {
-      return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/ship', { method: 'POST' }));
-    },
-    async receiveOrder(orderNo) {
-      return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/receive', { method: 'POST' }));
-    },
+    async cancelOrder(orderNo) { return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/cancel', { method: 'POST' })); },
+    async receiveOrder(orderNo) { return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/receive', { method: 'POST' })); },
 
-    /* 收藏 */
-    async getFavorites() {
-      const list = await request('/favorites');
-      return (list || []).map(p => p.id ?? p.productId);
-    },
+    async getFavorites() { return ((await request('/favorites')) || []).map(p => p.id ?? p.productId); },
     async toggleFavorite(productId) {
       const r = await request('/favorites/' + productId + '/toggle', { method: 'POST' });
-      return !!(r && (r.favorited ?? r.favorite ?? r.favourite ?? r.fav));
+      return !!(r && (r.favorited ?? r.favorite));
     },
 
-    /* 登录 / 注册 */
-    async login(phone, password) {
-      return request('/auth/login', { method: 'POST', body: { phone, password } });
-    },
-    async register(phone, password, nickname) {
-      return request('/auth/register', { method: 'POST', body: { phone, password, nickname } });
-    },
-    async getMe() {
-      return request('/auth/me');
-    },
-    async logout() {
-      return request('/auth/logout', { method: 'POST' });
-    },
+    async login(phone, password) { return request('/auth/login', { method: 'POST', body: { phone, password } }); },
+    async register(phone, password, nickname) { return request('/auth/register', { method: 'POST', body: { phone, password, nickname } }); },
+    async getMe() { return request('/auth/me'); },
+    async logout() { return request('/auth/logout', { method: 'POST' }); },
   };
 })();

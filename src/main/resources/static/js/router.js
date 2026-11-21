@@ -1,14 +1,16 @@
-/* 极简 hash 路由：#/  #/item/3  #/me/orders|address|coupons  #/login */
+/* Hash 路由只负责页面导航；前端守卫不是安全边界，接口仍必须由后端鉴权。 */
 const parseRoute = () => {
-  const [a, b] = location.hash.slice(2).split('/');
-  // 未登录访问「我的」相关页时，跳转到登录页
-  if (a === 'me' && !Store.user) {
+  const [a, rawId] = location.hash.slice(2).split('/');
+  if (a === 'me' && !Store.user && (Store.authReady || !Store.token)) {
     if (location.hash !== '#/login') location.hash = '#/login';
     return;
   }
+  let id = rawId;
+  try { id = decodeURIComponent(rawId); } catch (e) {}
   Store.route = a === 'login' ? { name: 'login' }
-    : a === 'item' && byId(+b) ? { name: 'detail', id: +b }
-    : a === 'me' ? { name: 'me', tab: ['orders', 'address', 'coupons'].includes(b) ? b : 'orders' } : { name: 'home' };
+    : a === 'item' && id ? { name: 'detail', id }
+    : a === 'me' ? { name: 'me', tab: ['orders', 'address', 'coupons'].includes(rawId) ? rawId : 'orders' }
+    : { name: 'home' };
   scrollTo(0, 0);
 };
 addEventListener('hashchange', parseRoute);

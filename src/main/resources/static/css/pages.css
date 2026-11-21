@@ -183,7 +183,6 @@
 }
 
 @media (hover: none) {
-  .cp:hover, .ad:hover, .gth .th:hover, .chips a:hover, .ob button:hover { transform: none; }
   .cp:active, .ad:active, .od .oi:active { background: var(--pr2); }
 }
 

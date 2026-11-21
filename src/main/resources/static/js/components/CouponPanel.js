@@ -1,6 +1,7 @@
 Comps.CouponPanel = {
-  data: () => ({ f: 'ok', pool: Store.couponPool }),
+  data: () => ({ f: 'ok' }),
   computed: {
+    pool() { return Store.couponPool; },
     ok() { return Store.coupons.filter(c => !c.used && c.exp > Date.now()); },
     dead() { return Store.coupons.filter(c => c.used || c.exp <= Date.now()); },
   },
@@ -9,5 +10,6 @@ Comps.CouponPanel = {
     <div class="empty" v-if="f==='ok'&&!ok.length">暂无可用优惠券，<a @click="f='pool'">去领券中心看看</a></div>
     <div class="cpl two" v-if="f==='dead'"><coupon-card v-for="c in dead" :key="c.uid" :c="c" dead></coupon-card></div>
     <div class="empty" v-if="f==='dead'&&!dead.length">没有已使用或已过期的优惠券</div>
-    <div class="cpl two" v-if="f==='pool'"><coupon-card v-for="c in pool" :key="c.id" :c="c"><button :disabled="Coupons.owned(c)" @click="Coupons.claim(c)">{{ Coupons.owned(c) ? '已领取' : '立即领取' }}</button></coupon-card></div></div>`,
+    <div class="cpl two" v-if="f==='pool'"><coupon-card v-for="c in pool" :key="c.id" :c="c"><button :disabled="S.pending.coupon||Coupons.owned(c)" @click="Coupons.claim(c)">{{ Coupons.owned(c) ? '已领取' : '立即领取' }}</button></coupon-card></div>
+    <div class="empty" v-if="f==='pool'&&!pool.length">暂无可以领取的优惠券</div></div>`,
 };

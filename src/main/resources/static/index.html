@@ -19,7 +19,7 @@
     <button class="cartbtn" @click="S.cartOpen=true" aria-label="打开我的购物车"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L20.5 7H6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>我的购物车<i v-if="Cart.count()">{{ Cart.count() }}</i></button>
   </header>
   <component :is="view"></component>
-  <footer class="foot">拾光百货 · 演示站点，商品、评价与订单均为模拟数据</footer>
+  <footer class="foot">拾光百货 · 商品、订单与账户数据由服务端提供</footer>
   <cart-drawer></cart-drawer>
   <checkout v-if="S.co"></checkout>
   <bottom-nav></bottom-nav>

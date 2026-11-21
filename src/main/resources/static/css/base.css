@@ -462,9 +462,7 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; accent-
 }
 
 @media (hover: none) {
-  .card:hover, .fi:hover, .cartbtn:hover, .more:hover, .b1:hover, .b2:hover, .go:hover:not(:disabled) { transform: none; }
   .card:active, .fi:active { background: var(--pr2); transform: scale(.985); }
-  .cats li:hover { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
