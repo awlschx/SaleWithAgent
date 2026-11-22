@@ -135,7 +135,7 @@ public class ProductsRepository {
                     v.setUpdateTime(ts2 == null ? null : ts2.toLocalDateTime());
                     return v;
                 });
-        log.info("selectQuery:{}",selectQuery);
+
 
         return PageResult.<ProductsVO>of(selectQuery,total,productQueryDTO.getPage(),productQueryDTO.getSize());
 
@@ -169,5 +169,40 @@ public class ProductsRepository {
         return s.replace("\\", "\\\\")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
+    }
+
+    public PageResult<ProductsVO> flashProducts(ProductQueryDTO productQueryDTO) {
+        //按秒杀价格判断是否是在参与秒杀的物品
+        String selectSql  = "select * from products where flash_price is not null and flash_price > 0 ";
+        String countSql =  "select count(*) from products where flash_price is not null and flash_price > 0 ";
+        long total = Objects.requireNonNullElse(
+                jdbc.queryForObject(countSql, long.class),0L
+        );
+        List<ProductsVO> query = jdbc.query(selectSql, (rs, i) -> {
+            ProductsVO v = new ProductsVO();
+            v.setId(rs.getLong("id"));
+            v.setName(rs.getString("name"));
+            v.setPrice(rs.getBigDecimal("price"));
+            v.setCategory(rs.getString("category"));
+            v.setOriginalPrice(rs.getBigDecimal("original_price"));
+            v.setSales(rs.getInt("sales"));
+            v.setStock(rs.getInt("stock"));
+            v.setHue(rs.getInt("hue"));
+            v.setFlashPrice(rs.getBigDecimal("flash_price"));
+            v.setFlashPercent(rs.getInt("flash_percent"));
+            var ts1 = rs.getTimestamp("created_at");
+            var ts2 = rs.getTimestamp("updated_at");
+            var ts3 = rs.getTimestamp("flash_start_at");
+            var ts4 = rs.getTimestamp("flash_end_at");
+            v.setFlashStock(rs.getInt("flash_stock"));
+            v.setCreateTime(ts1 == null ? null : ts1.toLocalDateTime());
+            v.setUpdateTime(ts2 == null ? null : ts2.toLocalDateTime());
+            v.setFlashStartAt(ts3 == null ? null : ts3.toLocalDateTime());
+            v.setFlashEndAt(ts4 == null ? null : ts4.toLocalDateTime());
+            return v;
+        });
+        log.info("Query:{}",query);
+        return PageResult.<ProductsVO> of(query,total,productQueryDTO.getPage(),productQueryDTO.getSize());
+
     }
 }

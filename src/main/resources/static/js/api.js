@@ -90,6 +90,10 @@ const API = (() => {
     nextDay: !!p.nextDay,
     f: optionalNum(p.flashPrice),
     pct: optionalNum(p.flashPercent),
+    /* 秒杀场次：0 表示后端没返回，前端据此退回旧的百分比展示 */
+    fStart: toMs(p.flashStartAt),
+    fEnd: toMs(p.flashEndAt),
+    fStock: optionalNum(p.flashStock),
     specs: Array.isArray(p.specs) ? p.specs.map(s => typeof s === 'string' ? s : (s.spec ?? s.name)).filter(Boolean) : [],
   });
   const mapAddress = a => ({

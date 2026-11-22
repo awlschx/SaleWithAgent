@@ -44,4 +44,11 @@ public class ProductsController {
     public Result<PageResult<ProductsVO>> pageProducts( ProductQueryDTO productQueryDTO){
         return  Result.ok(productsService.pageProduct(productQueryDTO));
     }
+    /*
+    *秒杀分类的实现
+     */
+    @GetMapping("/flash")
+    public Result<PageResult<ProductsVO>> flashProducts(ProductQueryDTO productQueryDTO){
+        return Result.ok(productsService.flashProducts(productQueryDTO));
+    }
 }

@@ -10,4 +10,7 @@ public interface ProductsService {
     List<ProductsVO> ListProducts();
 
     PageResult<ProductsVO> pageProduct(ProductQueryDTO productQueryDTO);
+
+    PageResult<ProductsVO> flashProducts(ProductQueryDTO productQueryDTO);
+
 }

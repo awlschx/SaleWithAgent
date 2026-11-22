@@ -1,6 +1,6 @@
 /* 首页：分类导航、领券、真实秒杀数据与服务端商品查询。 */
 Comps.HomeView = {
-  data: () => ({ cats: CATS, slides: SLIDES, si: 0 }),
+  data: () => ({ cats: CATS, slides: SLIDES, si: 0, now: Date.now() }),
   computed: {
     pool() { return Store.couponPool; },
     shown() { return Store.catalogView; },
@@ -22,13 +22,28 @@ Comps.HomeView = {
       Catalog.load();
     },
     turn(d) { this.si = (this.si + d + this.slides.length) % this.slides.length; },
+    /* 秒杀剩余时间：未开始 → 即将开始；已结束或无场次 → 返回空串，交给旧进度条兜底 */
+    flashLeft(p) {
+      if (p.fStart && p.fStart > this.now) return '即将开始';
+      if (!p.fEnd || p.fEnd <= this.now) return '';
+      const ms = p.fEnd - this.now;
+      const d = Math.floor(ms / 864e5);
+      const h = Math.floor(ms / 36e5) % 24;
+      const m = Math.floor(ms / 6e4) % 60;
+      const s = Math.floor(ms / 1e3) % 60;
+      return d > 0 ? `剩 ${d} 天 ${pad(h)}:${pad(m)}:${pad(s)}` : `剩 ${pad(h)}:${pad(m)}:${pad(s)}`;
+    },
   },
   mounted() {
     Catalog.load();
     Catalog.loadFlash();
     this.timer = setInterval(() => this.turn(1), 5000);
+    /* 倒计时每秒推进：只在确实有场次时更新状态，避免整页无意义重渲染 */
+    this.tick = setInterval(() => {
+      if (this.flash.some(p => p.fEnd)) this.now = Date.now();
+    }, 1000);
   },
-  unmounted() { clearInterval(this.timer); },
+  unmounted() { clearInterval(this.timer); clearInterval(this.tick); },
   template: `<div class="w">
   <section class="hero">
     <ul class="cats"><li v-for="c in cats" :key="c.n" :class="{on:S.cat===c.n}" @click="pick(c.n)"><b>{{ c.n }}</b><span>{{ c.s }}</span></li></ul>
@@ -51,9 +66,13 @@ Comps.HomeView = {
     <div class="cpl"><coupon-card v-for="c in pool" :key="c.id" :c="c"><button :disabled="S.pending.coupon||Coupons.owned(c)" @click="Coupons.claim(c)">{{ Coupons.owned(c) ? '已领取' : '立即领取' }}</button></coupon-card></div>
     <div class="empty" v-if="!pool.length">暂无可以领取的优惠券</div></section>
   <section class="box" v-if="flash.length">
-    <div class="bh"><h3>限时秒杀</h3><small>活动价格与进度以服务端数据为准</small></div>
+    <div class="bh"><h3>限时秒杀</h3><small>活动价格与倒计时以服务端数据为准</small></div>
     <div class="flash"><div class="fi" v-for="p in flash" :key="p.id" @click="go('#/item/'+p.id)"><thumb :p="p"></thumb><div class="nm">{{ p.n }}</div>
-      <div class="fp">¥{{ p.f }}<s>¥{{ p.p }}</s></div><div class="bar" v-if="p.pct!=null"><i :style="{width:p.pct+'%'}"></i><span>已抢 {{ p.pct }}%</span></div></div></div>
+      <div class="fp" v-if="p.f!=null">¥{{ p.f }}<s>¥{{ p.p }}</s></div>
+      <div class="fp" v-else>¥{{ p.p }}</div>
+      <div class="bar" v-if="p.fStock===0" style="opacity:.6"><span>已抢光</span></div>
+      <div class="bar" v-else-if="flashLeft(p)"><span>{{ flashLeft(p) }}</span></div>
+      <div class="bar" v-else-if="p.pct!=null"><i :style="{width:p.pct+'%'}"></i><span>已抢 {{ p.pct }}%</span></div></div></div>
   </section>
   <section class="box" ref="list">
     <div class="chips mchips"><a v-for="c in cats" :key="c.n" :class="{on:S.cat===c.n}" @click="pick(c.n)">{{ c.n }}</a></div>

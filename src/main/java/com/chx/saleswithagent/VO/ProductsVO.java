@@ -17,6 +17,9 @@ public class ProductsVO {
     private Integer hue;
     private BigDecimal flashPrice;
     private Integer flashPercent;
+    private LocalDateTime flashStartAt;
+    private LocalDateTime flashEndAt;
+    private long flashStock;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
