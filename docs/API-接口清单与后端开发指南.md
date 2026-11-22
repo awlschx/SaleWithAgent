@@ -157,12 +157,14 @@
 
 ### 2.8 认证（第二阶段）
 
-| 方法 | 路径 | 请求 | 返回 |
-|---|---|---|---|
-| POST | `/api/auth/register` | `{phone, password, nickname}` | `{token, userId, nickname}` |
-| POST | `/api/auth/login` | `{phone, password}` | `{token, userId, nickname}` |
-| GET | `/api/auth/me` | Header `Authorization: Bearer` | `{userId, nickname, phone}` |
-| POST | `/api/auth/logout` | — | `{ok: true}` |
+> 设计选择：**注册只创建账号，不签发 token**。注册成功后前端跳转到登录页，用户重新输入手机号和密码；**只有登录成功才签发 token**。这样签发逻辑集中在 `/api/auth/login` 一处，登录是获取凭证的唯一入口。
+
+| 方法 | 路径 | 请求 | 返回 | 备注 |
+|---|---|---|---|---|
+| POST | `/api/auth/register` | `{phone, password, nickname}` | `{userId, nickname}` | 仅创建账号，**不返回 token** |
+| POST | `/api/auth/login` | `{phone, password}` | `{token, userId, nickname}` | 唯一签发 token 的入口 |
+| GET | `/api/auth/me` | Header `Authorization: Bearer` | `{userId, nickname, phone}` | — |
+| POST | `/api/auth/logout` | — | `{ok: true}` | — |
 
 ---
 
@@ -361,7 +363,7 @@ com.chx.saleswithagent
 2. `js/store.js`：`CartService`、`CouponsService`、`Addr`、`Store.orders` 从"直接改数组"改成 `await API.xxx()`，本地只保留 UI 状态；
 3. `js/app.js`：启动时并行拉商品 + 购物车 + 地址 + 券；
 4. `js/components/Checkout.js`：提交订单改为调接口，不再自己算金额；
-5. 第二阶段加登录页和 `Authorization` 头。
+5. 第二阶段加登录页和 `Authorization` 头：注册成功后跳转到登录页让用户重新登录；登录成功才把 `token` 存入本地并在后续请求带上 `Authorization: Bearer`。
 
 ---
 

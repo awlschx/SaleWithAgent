@@ -12,13 +12,18 @@ Comps.LoginView = {
       try {
         if (this.mode === 'login') {
           await Auth.login(this.phone, this.password);
+          this.password = '';
+          toast('登录成功');
+          go('#/');
         } else {
-          const data = await Auth.register(this.phone, this.password, this.nickname);
-          if (!Store.user) await Auth.login(this.phone, this.password);
+          await Auth.register(this.phone, this.password, this.nickname);
+          /* 注册成功不自动登录：只保留手机号便于用户确认，密码必须重新输入。 */
+          this.mode = 'login';
+          this.password = '';
+          this.err = '';
+          go('#/login');
+          toast('注册成功，请使用手机号和密码登录');
         }
-        this.password = '';
-        toast(this.mode === 'login' ? '登录成功' : '注册成功，已自动登录');
-        go('#/');
       } catch (e) {
         this.err = e.message || '操作失败，请稍后重试';
       } finally {

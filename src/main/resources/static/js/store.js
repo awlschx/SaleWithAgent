@@ -269,12 +269,8 @@ const Auth = {
     return data;
   },
   async register(phone, password, nickname) {
-    const data = await API.register(phone, password, nickname);
-    if (data && (data.token || data.accessToken)) {
-      this.apply(data, phone);
-      await this.reload();
-    }
-    return data;
+    /* 注册只创建账号；即使接口返回 token，也不在这里写入登录态。 */
+    return API.register(phone, password, nickname);
   },
   clearPrivateState() {
     Store.user = null;
