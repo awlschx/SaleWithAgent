@@ -205,4 +205,29 @@ public class ProductsRepository {
         return PageResult.<ProductsVO> of(query,total,productQueryDTO.getPage(),productQueryDTO.getSize());
 
     }
+
+    public ProductsVO getProduct(long id) {
+        String selectSql  = "select * from products where id = ?";
+        return jdbc.queryForObject(selectSql,
+                (rs,i)->{
+            ProductsVO v = new ProductsVO();
+            v.setId(rs.getLong("id"));
+            v.setName(rs.getString("name"));
+            v.setPrice(rs.getBigDecimal("price"));
+            v.setCategory(rs.getString("category"));
+            v.setOriginalPrice(rs.getBigDecimal("original_price"));
+            v.setSales(rs.getInt("sales"));
+            v.setStock(rs.getInt("stock"));
+            v.setHue(rs.getInt("hue"));
+            v.setFlashPrice(rs.getBigDecimal("flash_price"));
+            v.setFlashPercent(rs.getInt("flash_percent"));
+            var ts1 = rs.getTimestamp("created_at");
+            var ts2 = rs.getTimestamp("updated_at");
+            v.setCreateTime(ts1 == null ? null : ts1.toLocalDateTime());
+            v.setUpdateTime(ts2 == null ? null : ts2.toLocalDateTime());
+            v.setFlashStartAt(ts1 == null ? null : ts1.toLocalDateTime());
+            v.setFlashEndAt(ts2 == null ? null : ts2.toLocalDateTime());
+            return v;
+                },id);
+    }
 }

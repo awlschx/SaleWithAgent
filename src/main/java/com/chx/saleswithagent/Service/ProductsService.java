@@ -13,4 +13,6 @@ public interface ProductsService {
 
     PageResult<ProductsVO> flashProducts(ProductQueryDTO productQueryDTO);
 
+    ProductsVO getProduct(long id);
+
 }

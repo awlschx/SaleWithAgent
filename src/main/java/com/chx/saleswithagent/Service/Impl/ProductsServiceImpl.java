@@ -36,4 +36,9 @@ public class ProductsServiceImpl implements ProductsService {
     public PageResult<ProductsVO> flashProducts(ProductQueryDTO productQueryDTO) {
         return productsRepository.flashProducts(productQueryDTO);
     }
+
+    @Override
+    public ProductsVO getProduct(long id) {
+        return productsRepository.getProduct(id);
+    }
 }

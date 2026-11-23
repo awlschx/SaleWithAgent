@@ -8,10 +8,7 @@ import com.chx.saleswithagent.Service.ProductsService;
 import com.chx.saleswithagent.VO.ProductsVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,5 +47,12 @@ public class ProductsController {
     @GetMapping("/flash")
     public Result<PageResult<ProductsVO>> flashProducts(ProductQueryDTO productQueryDTO){
         return Result.ok(productsService.flashProducts(productQueryDTO));
+    }
+    /*
+    *具体商品的获取
+     */
+    @GetMapping("/{id}")
+    public Result<ProductsVO> getProduct(@PathVariable long id){
+        return Result.ok(productsService.getProduct(id));
     }
 }
