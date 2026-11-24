@@ -96,6 +96,16 @@ const API = (() => {
     fStock: optionalNum(p.flashStock),
     specs: Array.isArray(p.specs) ? p.specs.map(s => typeof s === 'string' ? s : (s.spec ?? s.name)).filter(Boolean) : [],
   });
+  /* 轮播配置：后端已过滤档期并按 sort 排好，这里只做字段改名，不再排序 */
+  const mapBanner = b => ({
+    id: b.id,
+    t: b.title ?? '',
+    d: b.description ?? '',
+    b: b.buttonText ?? '',
+    bg: b.bgColor ?? '#ff5000',
+    lt: b.linkType ?? 'CATEGORY',
+    lv: b.linkTarget ?? '',
+  });
   const mapAddress = a => ({
     id: a.id,
     name: a.name ?? '',
@@ -181,6 +191,12 @@ const API = (() => {
     async getProducts(params = {}) { return productPage(await request('/products' + qs(params)), params); },
     async getProduct(id) { return mapProduct(await request('/products/' + encodeURIComponent(id))); },
     async getFlashProducts(params = {}) { return productPage(await request('/products/flash' + qs(params)), params); },
+    /* 轮播数量有限，正常应是裸数组；同时兼容被包成 {items|records|list} 的情况 */
+    async getBanners() {
+      const data = await request('/banners');
+      const rows = Array.isArray(data) ? data : (data?.items || data?.records || data?.list || []);
+      return rows.map(mapBanner);
+    },
 
     async getCart() { return mapCart(await request('/cart')); },
     async addCartItem(item) { return mapCart(await request('/cart/items', { method: 'POST', body: item })); },

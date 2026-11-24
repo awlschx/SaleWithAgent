@@ -1,14 +1,21 @@
 /* 首页：分类导航、领券、真实秒杀数据与服务端商品查询。 */
 Comps.HomeView = {
-  data: () => ({ cats: CATS, slides: SLIDES, si: 0, now: Date.now() }),
+  data: () => ({ cats: CATS, si: 0, now: Date.now() }),
   computed: {
     pool() { return Store.couponPool; },
     shown() { return Store.catalogView; },
     flash() { return Store.flash; },
+    /* 服务端配置优先；接口未就绪时回退到内置 SLIDES，并把两种结构归一化 */
+    slides() {
+      if (Store.banners.length) return Store.banners;
+      return SLIDES.map(s => ({ id: 'legacy-' + s.cat, t: s.t, d: s.d, b: s.b, bg: s.bg, lt: 'CATEGORY', lv: s.cat }));
+    },
   },
   watch: {
     'S.cat'() { Catalog.load(); },
     'S.q'() { Catalog.load(); },
+    /* 数据源切换后长度可能变短，避免 si 越界导致一张都不显示 */
+    slides(n) { if (this.si >= n.length) this.si = 0; },
   },
   methods: {
     pick(c) {
@@ -21,7 +28,21 @@ Comps.HomeView = {
       Store.catalogSort = k;
       Catalog.load();
     },
-    turn(d) { this.si = (this.si + d + this.slides.length) % this.slides.length; },
+    turn(d) {
+      const n = this.slides.length;
+      if (!n) return;
+      this.si = (this.si + d + n) % n;
+    },
+    /* 按 linkType 分发：类型决定动作，目标提供参数 */
+    openBanner(s) {
+      switch (s.lt) {
+        case 'PRODUCT': return go('#/item/' + s.lv);
+        case 'COUPON': return go('#/me/coupons');
+        case 'URL': if (/^https?:\/\//i.test(s.lv || '')) location.href = s.lv; return;
+        case 'CATEGORY': return this.pick(s.lv);
+        default: return;
+      }
+    },
     /* 秒杀剩余时间：未开始 → 即将开始；已结束或无场次 → 返回空串，交给旧进度条兜底 */
     flashLeft(p) {
       if (p.fStart && p.fStart > this.now) return '即将开始';
@@ -37,6 +58,7 @@ Comps.HomeView = {
   mounted() {
     Catalog.load();
     Catalog.loadFlash();
+    Catalog.loadBanners();
     this.timer = setInterval(() => this.turn(1), 5000);
     /* 倒计时每秒推进：只在确实有场次时更新状态，避免整页无意义重渲染 */
     this.tick = setInterval(() => {
@@ -48,7 +70,7 @@ Comps.HomeView = {
   <section class="hero">
     <ul class="cats"><li v-for="c in cats" :key="c.n" :class="{on:S.cat===c.n}" @click="pick(c.n)"><b>{{ c.n }}</b><span>{{ c.s }}</span></li></ul>
     <div class="car">
-      <div class="sl" v-for="(s,i) in slides" :key="i" :class="{on:si===i}" :style="{background:s.bg}"><h2>{{ s.t }}</h2><p>{{ s.d }}</p><button @click="pick(s.cat)">{{ s.b }}</button></div>
+      <div class="sl" v-for="(s,i) in slides" :key="s.id ?? i" :class="{on:si===i}" :style="{background:s.bg}"><h2>{{ s.t }}</h2><p>{{ s.d }}</p><button @click="openBanner(s)">{{ s.b }}</button></div>
       <button class="ar l" @click="turn(-1)" aria-label="上一张">&lt;</button><button class="ar r" @click="turn(1)" aria-label="下一张">&gt;</button>
       <div class="dots"><i v-for="(s,i) in slides" :key="i" :class="{on:si===i}" @click="si=i"></i></div>
     </div>

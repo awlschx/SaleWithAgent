@@ -2,7 +2,7 @@
 const readSessionToken = () => { try { return sessionStorage.getItem('sg_token') || ''; } catch (e) { return ''; } };
 const Store = Vue.reactive({
   cart: [], cartCount: 0, cartSelectedAmount: 0,
-  favs: [], orders: [], addrs: [], coupons: [], couponPool: [], flash: [],
+  favs: [], orders: [], addrs: [], coupons: [], couponPool: [], flash: [], banners: [],
   user: null, token: readSessionToken(), authReady: false,
   catalogTotal: 0, catalogPage: 1, catalogSize: 8, catalogView: [],
   catalogLoading: false, catalogError: '',
@@ -75,6 +75,16 @@ const Catalog = {
       Store.flash = result.items;
     } catch (e) {
       Store.flash = [];
+    }
+  },
+  /* 轮播配置：接口失败保持空数组，由视图回退到内置 SLIDES，首页顶部不会空 */
+  async loadBanners() {
+    try {
+      Store.banners = await API.getBanners();
+    } catch (e) {
+      /* 回退会掩盖错误，这里必须留下痕迹，否则"接口没生效"看起来像"样式问题" */
+      console.warn('[banners] 加载失败，已回退到内置 SLIDES：', e.message);
+      Store.banners = [];
     }
   },
 };
