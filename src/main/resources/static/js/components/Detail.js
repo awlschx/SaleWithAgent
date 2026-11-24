@@ -2,7 +2,7 @@
 Comps.Detail = {
   data: () => ({ vi: 0, sel: '', qty: 1, tab: 'info', detail: null, loading: false, loadError: '' }),
   computed: {
-    p() { return byId(Store.route.id) || this.detail; },
+    p() { return this.detail || byId(Store.route.id); },
     opts() { return this.p?.specs || []; },
   },
   watch: {
@@ -11,13 +11,20 @@ Comps.Detail = {
   },
   methods: {
     async load() {
-      const cached = byId(Store.route.id);
-      if (cached) { this.detail = null; this.loadError = ''; return; }
+      /* 详情页要实时价格与库存：总是请求；缓存只做「加载时先画出来」和「失败兜底」 */
+      this.detail = null;
       this.loading = true;
       this.loadError = '';
-      try { this.detail = await API.getProduct(Store.route.id); }
-      catch (e) { this.detail = null; this.loadError = e.message || '商品不存在或暂不可售'; }
-      finally { this.loading = false; }
+      try {
+        this.detail = await API.getProduct(Store.route.id);
+      } catch (e) {
+        if (!byId(Store.route.id)) {
+          this.detail = null;
+          this.loadError = e.message || '商品不存在或暂不可售';
+        }
+      } finally {
+        this.loading = false;
+      }
     },
     add() { return Cart.add(this.p.id, this.qty, this.sel); },
     buy() {

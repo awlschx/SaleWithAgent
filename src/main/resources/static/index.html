@@ -9,9 +9,9 @@
 </head>
 <body>
 <div id="app">
-  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
+  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="home">首页</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a></span></div></div>
   <header class="w hd">
-    <div class="logo" role="button" tabindex="0" aria-label="返回首页" @click="reset" @keyup.enter="reset"><span>拾光<b>百货</b></span><small>SHIGUANG SELECT</small></div>
+    <div class="logo" role="button" tabindex="0" aria-label="返回首页" @click="home" @keyup.enter="home"><span>拾光<b>百货</b></span><small>SHIGUANG SELECT</small></div>
     <div class="sb">
       <form @submit.prevent="search" role="search"><input v-model.trim="q" aria-label="搜索商品" placeholder="搜索商品，试试“耳机”"><button type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>搜索</button></form>
       <div class="hot"><a v-for="h in hots" :key="h" @click="hot(h)">{{ h }}</a></div>

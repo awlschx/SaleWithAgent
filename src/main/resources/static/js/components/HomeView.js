@@ -10,6 +10,8 @@ Comps.HomeView = {
       if (Store.banners.length) return Store.banners;
       return SLIDES.map(s => ({ id: 'legacy-' + s.cat, t: s.t, d: s.d, b: s.b, bg: s.bg, lt: 'CATEGORY', lv: s.cat }));
     },
+    /* 右侧三行 banner：取轮播配置的前三张 */
+    sideBanners() { return this.slides.slice(0, 3); },
   },
   watch: {
     'S.cat'() { Catalog.load(); },
@@ -74,15 +76,9 @@ Comps.HomeView = {
       <button class="ar l" @click="turn(-1)" aria-label="上一张">&lt;</button><button class="ar r" @click="turn(1)" aria-label="下一张">&gt;</button>
       <div class="dots"><i v-for="(s,i) in slides" :key="i" :class="{on:si===i}" @click="si=i"></i></div>
     </div>
-    <aside class="me">
-      <div class="u">
-        <div class="av">{{ S.user ? (S.user.nickname || S.user.phone || '我').slice(0, 1) : '客' }}</div>
-        <div v-if="S.user"><div>Hi，{{ S.user.nickname || S.user.phone }}</div><small style="color:var(--mu)"><a @click="Auth.logout()">退出登录</a></small></div>
-        <div v-else style="cursor:pointer" @click="go('#/login')"><div>Hi，欢迎回来</div><small style="color:var(--mu)">登录 / 注册查看专属优惠</small></div>
-      </div>
-      <div class="q"><a @click="Auth.go('#/me/orders')"><b>{{ S.orders.length }}</b>订单</a><a @click="Auth.go('#/me/address')"><b>{{ S.addrs.length }}</b>地址</a><a @click="Auth.go('#/me/coupons')"><b>{{ S.coupons.filter(c=>!c.used&&c.exp>Date.now()).length }}</b>优惠券</a></div>
-      <div class="note">商品、优惠与订单信息以服务端返回为准。</div>
-    </aside>
+    <div class="hbn" v-if="sideBanners.length">
+      <div class="hb" v-for="s in sideBanners" :key="s.id" :style="{background:s.bg}" @click="openBanner(s)"><b>{{ s.t }}</b><small>{{ s.d }}</small></div>
+    </div>
   </section>
   <section class="box"><div class="bh"><h3>领券中心</h3><small>领取资格、有效期与使用规则由服务端校验</small></div>
     <div class="cpl"><coupon-card v-for="c in pool" :key="c.id" :c="c"><button :disabled="S.pending.coupon||Coupons.owned(c)" @click="Coupons.claim(c)">{{ Coupons.owned(c) ? '已领取' : '立即领取' }}</button></coupon-card></div>

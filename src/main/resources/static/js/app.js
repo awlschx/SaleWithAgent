@@ -12,6 +12,17 @@ const app = Vue.createApp({
     },
     hot(h) { this.q = h; this.search(); },
     reset() { this.q = ''; Store.q = ''; Store.cat = '全部'; go('#/'); },
+    /* 导航栏「首页」：回到首页并重新拉取首页数据
+       已经在首页时 hash 不会变化、组件不会重建，必须手动调接口，否则看到的是旧数据 */
+    home() {
+      const already = Store.route.name === 'home';
+      this.reset();
+      if (already) {
+        Catalog.load();
+        Catalog.loadFlash();
+        Catalog.loadBanners();
+      }
+    },
     logout() { return Auth.logout(); },
   },
   mounted() {

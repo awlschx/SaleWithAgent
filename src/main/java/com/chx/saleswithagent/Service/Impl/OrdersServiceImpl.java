@@ -7,6 +7,7 @@ import com.chx.saleswithagent.Repository.OrdersRepository;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.OrdersService;
 import com.chx.saleswithagent.VO.OrderItemsVO;
+import com.chx.saleswithagent.VO.OrderPreviewVO;
 import com.chx.saleswithagent.VO.OrdersVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +77,13 @@ public class OrdersServiceImpl implements OrdersService {
         //模拟发货要改orders表，把status改为已发货
         log.info("准备发货");
         return ordersRepository.shipOrders(orderNo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderPreviewVO previewOrders(OrdersDTO ordersDTO, Long userId) {
+        log.info("预结算订单");
+        return ordersRepository.previewOrders(ordersDTO, userId);
     }
 
     @Override

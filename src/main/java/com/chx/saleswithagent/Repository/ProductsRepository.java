@@ -213,6 +213,8 @@ public class ProductsRepository {
             ProductsVO v = new ProductsVO();
             v.setId(rs.getLong("id"));
             v.setName(rs.getString("name"));
+            String specs = rs.getString("specs");
+            v.setSpecs(specs == null || specs.isBlank() ? List.of() : List.of(specs));
             v.setPrice(rs.getBigDecimal("price"));
             v.setCategory(rs.getString("category"));
             v.setOriginalPrice(rs.getBigDecimal("original_price"));

@@ -31,6 +31,16 @@ public class OrdersController {
         return Result.ok(ordersService.getOrders(userId,status));
     }
     /*
+    *预结算：只算金额，不落库、不核销优惠券
+     */
+    @PostMapping("/preview")
+    public Result previewOrders(@RequestBody OrdersDTO ordersDTO){
+        log.info("预结算订单");
+        Long userId = UserContext.getUserId();
+        return Result.ok(ordersService.previewOrders(ordersDTO, userId));
+    }
+
+    /*
     *提交订单
     *
      */

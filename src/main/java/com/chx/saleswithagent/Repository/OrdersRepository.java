@@ -1,5 +1,7 @@
 package com.chx.saleswithagent.Repository;
 
+import com.chx.saleswithagent.Common.BizException;
+import com.chx.saleswithagent.Constant.ErrorCode;
 import com.chx.saleswithagent.DTO.OrdersDTO;
 import com.chx.saleswithagent.DTO.OrdersItemsDTO;
 import com.chx.saleswithagent.Entity.AddressEntity;
@@ -186,6 +188,7 @@ public class OrdersRepository {
                 "item_amount, ship_fee, discount,pay_amount," +
                 " address_snapshot, user_coupon_id)" +
                 " VALUE (?,?,?,?,?,?,?,?,?)";
+        //金额算法与calcOrder保持一致，改动时两处一起改
         String product_sql = "SELECT price FROM products WHERE id = ?";
         BigDecimal total_price = BigDecimal.ZERO;
         //计算总金额，运费，优惠金额，实付
@@ -207,12 +210,14 @@ public class OrdersRepository {
         if(ordersDTO.getCouponId()!=null){
             //查询优惠卷
             UserCouponsVO userCouponsVO = couponsRepository.queryUserCouponById(userId, ordersDTO.getCouponId());
+            //校验
+             if (userCouponsVO == null || userCouponsVO.getUsed() == true) {
+                            throw new BizException(ErrorCode.COUPON_INVALID);
+                        }
             //删除优惠卷
             couponsRepository.deleteCoupons(ordersDTO.getCouponId());
-            //校验
-            if (userCouponsVO == null || userCouponsVO.getUsed() == true) {
-                throw new RuntimeException();
-            }
+
+
              minAmount = userCouponsVO.getMinAmount();
              offAmount = userCouponsVO.getOffAmount();
              if (total_price.compareTo(minAmount) >= 0) {
@@ -281,6 +286,75 @@ public class OrdersRepository {
 
         return vo;
     }
+    /*
+    *计算订单金额
+    *预结算和下单共用这一套算法，避免两边算出来的钱不一致
+    *只读：不核销优惠券、不写库
+     */
+    private OrderPreviewVO calcOrder(OrdersDTO ordersDTO, Long userId) {
+        String product_sql = "SELECT price FROM products WHERE id = ?";
+        List<OrdersItemsDTO> ordersItems = ordersDTO.getItems();
+        if (ordersItems == null || ordersItems.isEmpty()) {
+            throw new BizException(ErrorCode.ORDER_ITEMS_EMPTY);
+        }
+        //商品总额
+        BigDecimal itemAmount = BigDecimal.ZERO;
+        for (OrdersItemsDTO ordersItem : ordersItems) {
+            Long productId = ordersItem.getProductId();
+            int quantity = ordersItem.getQuantity();
+            BigDecimal price = jdbc.queryForObject(product_sql, BigDecimal.class, productId);
+            itemAmount = itemAmount.add(price.multiply(BigDecimal.valueOf(quantity))
+                    .setScale(2, RoundingMode.HALF_DOWN));
+        }
+        //运费暂时为0，后续按收货地址和活动规则计算
+        BigDecimal shipFee = BigDecimal.ZERO;
+        BigDecimal discount = BigDecimal.ZERO;
+        Long usedCouponId = null;
+        String couponMessage = null;
+        log.info("couponId{}",String.valueOf(ordersDTO.getCouponId()));
+        if(ordersDTO.getCouponId()!=null){
+            //查询优惠卷
+            UserCouponsVO userCouponsVO = couponsRepository.queryUserCouponById(userId, ordersDTO.getCouponId());
+            //校验：不存在或已经被使用
+            if (userCouponsVO == null || Boolean.TRUE.equals(userCouponsVO.getUsed())) {
+                throw new BizException(ErrorCode.COUPON_INVALID);
+            }
+            BigDecimal minAmount = userCouponsVO.getMinAmount() == null
+                    ? BigDecimal.ZERO : userCouponsVO.getMinAmount();
+            BigDecimal offAmount = userCouponsVO.getOffAmount() == null
+                    ? BigDecimal.ZERO : userCouponsVO.getOffAmount();
+            if (itemAmount.compareTo(minAmount) >= 0) {
+                discount = offAmount;
+                usedCouponId = ordersDTO.getCouponId();
+            } else {
+                //没到门槛不算报错，只告诉前端为什么没优惠
+                couponMessage = "满" + minAmount.stripTrailingZeros().toPlainString() + "元可用";
+            }
+        }
+        BigDecimal payAmount = itemAmount.add(shipFee).subtract(discount);
+        if (payAmount.compareTo(BigDecimal.ZERO) < 0) {
+            payAmount = BigDecimal.ZERO;
+        }
+        log.info("itemAmount{}",String.valueOf(itemAmount));
+        log.info("payAmount{}",String.valueOf(payAmount));
+
+        OrderPreviewVO vo = new OrderPreviewVO();
+        vo.setItemAmount(itemAmount);
+        vo.setShipFee(shipFee);
+        vo.setDiscount(discount);
+        vo.setPayAmount(payAmount);
+        vo.setUserCouponId(usedCouponId);
+        vo.setCouponMessage(couponMessage);
+        return vo;
+    }
+
+    /*
+    *预结算：只算金额，不落库、不核销优惠券
+     */
+    public OrderPreviewVO previewOrders(OrdersDTO ordersDTO, Long userId) {
+        return calcOrder(ordersDTO, userId);
+    }
+
     /*
     *根据订单号获取可以返回前端的订单（包含items）
      */

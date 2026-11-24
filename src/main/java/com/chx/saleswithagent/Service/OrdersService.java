@@ -1,6 +1,7 @@
 package com.chx.saleswithagent.Service;
 
 import com.chx.saleswithagent.DTO.OrdersDTO;
+import com.chx.saleswithagent.VO.OrderPreviewVO;
 import com.chx.saleswithagent.VO.OrdersVO;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface OrdersService {
     OrdersVO shipOrders(String orderNo);
 
     OrdersVO receiveOrders(String orderNo);
+
+    OrderPreviewVO previewOrders(OrdersDTO ordersDTO, Long userId);
 }

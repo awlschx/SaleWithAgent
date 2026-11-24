@@ -229,7 +229,7 @@ const API = (() => {
     async claimCoupon(templateId) { return mapUserCoupon(await request('/coupons/' + templateId + '/claim', { method: 'POST' })); },
 
     async getOrders(status) { return ((await request('/orders' + qs(status && status !== '全部' ? { status } : {}))) || []).map(mapOrder); },
-    async previewOrder(payload) { return request('/orders/preview', { method: 'POST', body: payload }); },
+    async previewOrder(payload) { return mapOrder(await request('/orders/preview', { method: 'POST', body: payload })); },
     async createOrder(payload, key) {
       return mapOrder(await request('/orders', {
         method: 'POST', body: payload, headers: { 'Idempotency-Key': key || idempotencyKey() },

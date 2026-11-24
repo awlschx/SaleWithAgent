@@ -3,7 +3,9 @@ package com.chx.saleswithagent.Constant;
 public enum ErrorCode {
     COMMON_ERROR(400,"错误"),
     PHONE_EXIST(40900,"该手机号已注册"),
-    USER_EXIST(400,"该用户已登录");
+    USER_EXIST(400,"该用户已登录"),
+    ORDER_ITEMS_EMPTY(40004,"结算商品为空"),
+    COUPON_INVALID(40005,"优惠券不存在或已被使用");
 
     private final int code;
     private final String message;

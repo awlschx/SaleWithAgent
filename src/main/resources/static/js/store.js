@@ -213,6 +213,10 @@ const Orders = {
     if (!Store.orders.some(x => x.no === order.no)) Store.orders.unshift(order);
     return order;
   },
+  /* 预结算：只算金额，不落库；和下单共用同一份 payload */
+  async preview(payload) {
+    return API.previewOrder(payload);
+  },
   async cancel(o) {
     const updated = await API.cancelOrder(o.no);
     await Promise.allSettled([this.load(), Coupons.loadMine()]);
