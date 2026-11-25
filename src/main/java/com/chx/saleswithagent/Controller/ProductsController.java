@@ -2,12 +2,10 @@ package com.chx.saleswithagent.Controller;
 
 import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.ProductQueryDTO;
-import com.chx.saleswithagent.DTO.ReviewQueryDTO;
 import com.chx.saleswithagent.Result.PageResult;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.ProductsService;
 import com.chx.saleswithagent.VO.ProductsVO;
-import com.chx.saleswithagent.VO.ReviewVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -56,13 +54,6 @@ public class ProductsController {
     @GetMapping("/{id}")
     public Result<ProductsVO> getProduct(@PathVariable long id){
         return Result.ok(productsService.getProduct(id));
-    }
-    /*
-    *获取某件商品的评价
-     */
-    @GetMapping("/{id}/reviews")
-    public Result<PageResult<ReviewVO>> getProductReviews(@PathVariable long id, ReviewQueryDTO reviewQueryDTO){
-        return Result.ok(productsService.getProductReviews(id,reviewQueryDTO));
     }
 
 }

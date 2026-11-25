@@ -1,11 +1,9 @@
 package com.chx.saleswithagent.Repository;
 
 import com.chx.saleswithagent.Common.BizException;
-import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.Constant.ErrorCode;
 import com.chx.saleswithagent.DTO.OrdersDTO;
 import com.chx.saleswithagent.DTO.OrdersItemsDTO;
-import com.chx.saleswithagent.DTO.ReviewDTO;
 import com.chx.saleswithagent.Entity.AddressEntity;
 import com.chx.saleswithagent.Entity.CartItemEntity;
 import com.chx.saleswithagent.Entity.OrdersEntity;
@@ -17,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.servlet.filter.OrderedFilter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -38,13 +34,11 @@ public class OrdersRepository {
     private CouponsRepository couponsRepository;
     @Resource
     private AddressRepository addressRepository;
-    private final NamedParameterJdbcTemplate namedjdbc;
 
     public OrdersRepository(JdbcTemplate jdbc,
-                            ObjectMapper objectMapper, NamedParameterJdbcTemplate namedjdbc) {
+                            ObjectMapper objectMapper) {
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
-        this.namedjdbc = namedjdbc;
     }
 
 
@@ -426,78 +420,5 @@ public class OrdersRepository {
         String sql = "UPDATE orders SET status = '已完成' ,receive_time = NOW() WHERE order_no = ?";
         jdbc.update(sql,orderNo);
         return getTrueOrdersVO(orderNo);
-    }
-
-
-    public record reviewOrdersStats(Long id,Long userId,String status){
-
-    }
-    public ReviewVO reviewOrders(String orderNo, ReviewDTO reviewDTO) {
-        //前端传回来了orderno，根据orderno，确定订单是当前用户的并且已经完成了
-        log.info(reviewDTO.toString());
-        String detectSql = "select id,user_id,status from orders where order_no = ? ";
-        Long userId = UserContext.getUserId();
-        reviewOrdersStats reviewOrdersStats = jdbc.query(detectSql,rs -> {
-            if (!rs.next()) {
-                log.info("真的假的");
-                return new reviewOrdersStats(0L,0L, "");
-            }
-            return new reviewOrdersStats(
-                    rs.getLong("id"),
-                    rs.getLong("user_id"),
-                    rs.getString("status"));
-        }, orderNo);
-        //判断归一性
-        log.info(String.valueOf(userId));
-        log.info(reviewOrdersStats.status());
-        if(!Objects.equals(userId, reviewOrdersStats.userId()) && !Objects.equals(reviewOrdersStats.status(), "已完成")){
-            //直接抛异常
-            log.info("抛出异常了");
-            throw new BizException(ErrorCode.COMMON_ERROR);
-        }
-        Long productId = reviewDTO.getProductId();
-        log.info("productId:{}",productId);
-        Long orderId = reviewOrdersStats.id();
-        String content = reviewDTO.getContent();
-        String spec =  reviewDTO.getSpec();
-        int rating = reviewDTO.getRating();
-        String updateSql = "insert into " +
-                "reviews (product_id,user_id,order_id,rating,content,spec,status) " +
-                "values (:productId,:userId,:orderId,:rating,:content, coalesce(nullif(trim(:spec), ''), '默认'),:status)";
-        MapSqlParameterSource p = new MapSqlParameterSource();
-        p.addValue("productId", productId);
-        p.addValue("userId", userId);
-        p.addValue("orderId", orderId);
-        p.addValue("rating", rating);
-        p.addValue("content", content);
-        p.addValue("spec", spec);
-        p.addValue("status",1);
-        namedjdbc.update(updateSql,p);
-
-        String selectSql  = ("select r.id, r.product_id, u.nickname, u.avatar, " +
-                "r.rating,  r.content, r.spec,  r.useful_count,  r.updated_at,  (ru.user_id is not null) as useful " +
-                "from reviews r " +
-                "join users u on r.user_id = u.id " +
-                "left join review_useful ru on ru.review_id = r.id and ru.user_id = :userId "+
-                "where r.product_id = :id " +
-                "and r.status = 1 ");
-        MapSqlParameterSource p1 = new MapSqlParameterSource();
-        p1.addValue("id", productId);
-        p1.addValue("userId", userId);
-        return namedjdbc.queryForObject(selectSql,p1,(rs,i)->{
-            ReviewVO v = new ReviewVO();
-            v.setId(rs.getLong("r.id"));
-            v.setProductId(rs.getInt("r.product_id"));
-            v.setUserName(rs.getString("u.nickname"));
-            v.setAvatar(rs.getString("u.avatar"));
-            v.setRating(rs.getInt("r.rating"));
-            v.setUsefulCount(rs.getInt("r.useful_count"));
-            v.setContent(rs.getString("r.content"));
-            v.setSpec(rs.getString("r.spec"));
-            v.setUseful(rs.getInt("useful"));
-            var ts1 = rs.getTimestamp("r.updated_at");
-            v.setUpdateTime(ts1 == null ? null : ts1.toLocalDateTime());
-            return v;
-        });
     }
 }
