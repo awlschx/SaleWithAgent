@@ -1,16 +1,20 @@
 package com.chx.saleswithagent.Repository;
 
+import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.ProductQueryDTO;
+import com.chx.saleswithagent.DTO.ReviewQueryDTO;
 import com.chx.saleswithagent.Entity.CartItemEntity;
 import com.chx.saleswithagent.Entity.ProductsEntity;
 import com.chx.saleswithagent.Result.PageResult;
 import com.chx.saleswithagent.VO.CartItemVO;
 import com.chx.saleswithagent.VO.ProductsVO;
+import com.chx.saleswithagent.VO.ReviewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -63,7 +67,7 @@ public class ProductsRepository {
         return jdbc.query(sql,
                 (rs, i) -> {
                     ProductsVO v = new ProductsVO();
-                    v.setId(rs.getLong("id"));
+                    v.setId(rs.getInt("id"));
                     v.setName(rs.getString("name"));
                     v.setPrice(rs.getBigDecimal("price"));
                     v.setCategory(rs.getString("category"));
@@ -119,7 +123,7 @@ public class ProductsRepository {
         List<ProductsVO> selectQuery = namedJdbc.query(selectSql.toString(), p,
                 (rs, i) -> {
                     ProductsVO v = new ProductsVO();
-                    v.setId(rs.getLong("id"));
+                    v.setId(rs.getInt("id"));
                     v.setName(rs.getString("name"));
                     v.setPrice(rs.getBigDecimal("price"));
                     v.setCategory(rs.getString("category"));
@@ -180,7 +184,7 @@ public class ProductsRepository {
         );
         List<ProductsVO> query = jdbc.query(selectSql, (rs, i) -> {
             ProductsVO v = new ProductsVO();
-            v.setId(rs.getLong("id"));
+            v.setId(rs.getInt("id"));
             v.setName(rs.getString("name"));
             v.setPrice(rs.getBigDecimal("price"));
             v.setCategory(rs.getString("category"));
@@ -211,7 +215,7 @@ public class ProductsRepository {
         return jdbc.queryForObject(selectSql,
                 (rs,i)->{
             ProductsVO v = new ProductsVO();
-            v.setId(rs.getLong("id"));
+            v.setId(rs.getInt("id"));
             v.setName(rs.getString("name"));
             String specs = rs.getString("specs");
             v.setSpecs(specs == null || specs.isBlank() ? List.of() : List.of(specs));
@@ -231,5 +235,57 @@ public class ProductsRepository {
             v.setFlashEndAt(ts2 == null ? null : ts2.toLocalDateTime());
             return v;
                 },id);
+    }
+
+    public PageResult<ReviewVO> getProductReviews(long id, ReviewQueryDTO reviewQueryDTO) {
+        String countSql = "select count(*) from reviews where product_id = ? and status = 1  ";
+        long total = Objects.requireNonNullElse(
+                jdbc.queryForObject(countSql, long.class, id),0L
+        );
+        int page = reviewQueryDTO.getPage();
+        int size = reviewQueryDTO.getSize();
+        MapSqlParameterSource p = new MapSqlParameterSource();
+        String ratingSql = "";
+        if(reviewQueryDTO.getRating() != null) {
+            ratingSql = (" and r.rating = :rating ");
+            int rating = reviewQueryDTO.getRating();
+            p.addValue("rating", rating);
+        }
+        log.info(p.toString());
+        StringBuilder selectSql  = new StringBuilder("select r.id, r.product_id, u.nickname, u.avatar, " +
+                "r.rating,  r.content, r.spec,  r.useful_count,  r.updated_at,  (ru.user_id is not null) as useful " +
+                "from reviews r " +
+                "join users u on r.user_id = u.id " +
+                "left join review_useful ru on ru.review_id = r.id and ru.user_id = :userId "+
+                "where r.product_id = :id " +
+                "and r.status = 1 ");
+       selectSql.append(ratingSql);
+           selectSql.append(
+                   "order by r.updated_at desc " +
+                   "limit :size offset :offset ");
+        int offset = (page-1)*size;
+
+        p.addValue("id", id).addValue("size", size).addValue("offset", offset);
+        Long userId = UserContext.getUserId();
+        p.addValue("userId",userId);
+        List<ReviewVO> reviewVOS = namedJdbc.query(selectSql.toString(),p,(rs,i)->{
+            ReviewVO v = new ReviewVO();
+            v.setId(rs.getLong("r.id"));
+            v.setProductId(rs.getInt("r.product_id"));
+            v.setUserName(rs.getString("u.nickname"));
+            v.setAvatar(rs.getString("u.avatar"));
+            v.setRating(rs.getInt("r.rating"));
+            v.setUsefulCount(rs.getInt("r.useful_count"));
+            v.setContent(rs.getString("r.content"));
+            v.setSpec(rs.getString("r.spec"));
+            v.setUseful(rs.getInt("useful"));
+            var ts1 = rs.getTimestamp("r.updated_at");
+            v.setUpdateTime(ts1 == null ? null : ts1.toLocalDateTime());
+            return v;
+        });
+        log.info("list:{}",reviewVOS);
+       return  PageResult.<ReviewVO> of(reviewVOS,total,page,size);
+
+
     }
 }

@@ -24,7 +24,7 @@ public class FavouriteRepository {
         return jdbc.query(sql,
                 (rs,i) -> {
             ProductsVO productsVO = new ProductsVO();
-            productsVO.setId(rs.getLong("id"));
+            productsVO.setId(rs.getInt("id"));
             productsVO.setName(rs.getString("name"));
             productsVO.setCategory(rs.getString("category"));
             productsVO.setPrice(rs.getBigDecimal("price"));

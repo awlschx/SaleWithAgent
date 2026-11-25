@@ -34,6 +34,18 @@
 .rv .up { display: inline-block; margin-top: 8px; padding: 2px 7px; border-radius: 6px; color: var(--mu); font-size: 12px; transition: color .2s, background .2s; }
 .rv .up:hover { background: var(--pr2); color: var(--pr); }
 .rv .up.on { color: var(--pr); }
+.rv .who { font-weight: 600; }
+.rv .tx { margin-top: 6px; font-size: 13px; line-height: 1.75; }
+/* 星级分布条 */
+.rvdist { display: grid; flex: 1; gap: 6px; min-width: 0; max-width: 340px; margin-left: auto; }
+.rvbar { display: grid; grid-template-columns: 32px minmax(0, 1fr) 36px; gap: 10px; align-items: center; color: var(--mu); font-size: 11px; font-variant-numeric: tabular-nums; }
+.rvbar i { position: relative; display: block; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(223,90,52,.14); }
+.rvbar em { position: absolute; top: 0; bottom: 0; left: 0; border-radius: inherit; background: var(--pr); }
+.rvbar span:last-child { text-align: right; }
+@media (max-width: 640px) {
+  .sum { flex-wrap: wrap; gap: 14px; }
+  .rvdist { width: 100%; max-width: none; margin-left: 0; }
+}
 
 /* 优惠券 */
 .cp { position: relative; display: flex; min-width: 0; overflow: hidden; border: 1px solid rgba(223,90,52,.24); border-radius: 14px; background: var(--card); box-shadow: var(--shadow-sm); transition: transform .3s var(--ease), box-shadow .3s, border-color .3s; }

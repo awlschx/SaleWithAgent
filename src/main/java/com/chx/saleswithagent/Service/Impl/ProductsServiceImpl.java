@@ -2,10 +2,12 @@ package com.chx.saleswithagent.Service.Impl;
 
 
 import com.chx.saleswithagent.DTO.ProductQueryDTO;
+import com.chx.saleswithagent.DTO.ReviewQueryDTO;
 import com.chx.saleswithagent.Repository.ProductsRepository;
 import com.chx.saleswithagent.Result.PageResult;
 import com.chx.saleswithagent.Service.ProductsService;
 import com.chx.saleswithagent.VO.ProductsVO;
+import com.chx.saleswithagent.VO.ReviewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,5 +42,10 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public ProductsVO getProduct(long id) {
         return productsRepository.getProduct(id);
+    }
+
+    @Override
+    public PageResult<ReviewVO> getProductReviews(long id, ReviewQueryDTO reviewQueryDTO) {
+        return productsRepository.getProductReviews(id,reviewQueryDTO);
     }
 }

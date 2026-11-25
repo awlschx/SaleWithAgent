@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class ProductsVO {
-    private Long id;
+    private Integer id;
     private String name;
     private List<String> specs;
     private String category;
@@ -21,7 +21,7 @@ public class ProductsVO {
     private Integer flashPercent;
     private LocalDateTime flashStartAt;
     private LocalDateTime flashEndAt;
-    private long flashStock;
+    private Integer flashStock;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

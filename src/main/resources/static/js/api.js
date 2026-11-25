@@ -173,19 +173,39 @@ const API = (() => {
       price: num(i.price),
     })),
   });
-  const productPage = (data, params) => {
-    /* 数组响应 = 后端尚未实现分页/筛选参数，返回的是完整目录；
-       分页对象响应 = 服务端已执行查询，前端直接信任。 */
+  /* 列表响应统一成 { items, total, page, size, serverPaged }
+     数组 = 后端还没实现分页参数、返回的是完整集合；对象 = 服务端已分页，前端直接信任 */
+  const toPage = (data, params, mapper) => {
     const plain = Array.isArray(data);
     const rows = plain ? data : (data?.items || data?.records || data?.list || []);
     return {
-      items: rows.map(mapProduct),
+      items: rows.map(mapper),
       total: plain ? rows.length : num(data?.total, rows.length),
       page: plain ? 1 : num(data?.page, params?.page || 1),
       size: plain ? rows.length : num(data?.size, params?.size || rows.length),
       serverPaged: !plain,
     };
   };
+  const productPage = (data, params) => toPage(data, params, mapProduct);
+
+  /* 评价：星级、有用数、平均分都来自服务端，前端只做展示，不参与计算 */
+  const mapReview = v => ({
+    id: v.id,
+    u: v.userName ?? v.username ?? v.nickname ?? '匿名用户',
+    av: v.avatar ?? '',
+    star: num(v.rating),
+    c: v.content ?? '',
+    spec: v.spec ?? '',
+    t: toMs(v.createdAt),
+    up: num(v.usefulCount),
+    upped: !!v.useful,
+    imgs: Array.isArray(v.images) ? v.images.filter(Boolean) : [],
+  });
+  const mapReviewSummary = s => ({
+    avg: num(s?.average),
+    total: num(s?.total),
+    dist: s?.distribution || {},
+  });
 
   return {
     async getProducts(params = {}) { return productPage(await request('/products' + qs(params)), params); },
@@ -196,6 +216,19 @@ const API = (() => {
       const data = await request('/banners');
       const rows = Array.isArray(data) ? data : (data?.items || data?.records || data?.list || []);
       return rows.map(mapBanner);
+    },
+
+    /* 评价列表：rating 为空表示不筛选，其余按页取 */
+    async getReviews(productId, params = {}) {
+      return toPage(await request('/products/' + encodeURIComponent(productId) + '/reviews' + qs(params)), params, mapReview);
+    },
+    /* 评价统计：平均分、总数、各星级条数，只取一次 */
+    async getReviewSummary(productId) {
+      return mapReviewSummary(await request('/products/' + encodeURIComponent(productId) + '/reviews/summary'));
+    },
+    /* 标记评价有用：服务端返回最新的 {usefulCount, useful} */
+    async markReviewUseful(reviewId) {
+      return request('/reviews/' + encodeURIComponent(reviewId) + '/useful', { method: 'POST' });
     },
 
     async getCart() { return mapCart(await request('/cart')); },

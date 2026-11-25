@@ -90,7 +90,7 @@ s { color: var(--mu); font-size: 12px; margin-left: 6px; font-weight: 400; }
 ::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 10px; background: rgba(117, 111, 100, .32); background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(223, 90, 52, .48); background-clip: padding-box; }
 
-.w { width: 100%; max-width: 1224px; margin: 0 auto; padding-inline: 20px; }
+.w { width: 100%; max-width: 1720px; margin: 0 auto; padding-inline: clamp(20px, 2.2vw, 44px); }
 
 /* 顶部信息栏 */
 .top { background: linear-gradient(90deg, #1d382f, var(--green)); color: rgba(255, 255, 255, .74); font-size: 12px; }
@@ -175,7 +175,7 @@ s { color: var(--mu); font-size: 12px; margin-left: 6px; font-weight: 400; }
 }
 
 /* 首屏：分类、活动与用户 */
-.hero { display: grid; grid-template-columns: 210px minmax(0, 1fr) 238px; gap: 18px; align-items: stretch; }
+.hero { display: grid; grid-template-columns: 3fr minmax(0, 10fr) 3.4fr; gap: 18px; align-items: stretch; }
 .cats, .me, .box { border: 1px solid var(--ln); background: var(--card); box-shadow: var(--shadow-sm); }
 .cats { padding: 9px; border-radius: 16px; }
 .cats li {
@@ -196,7 +196,7 @@ s { color: var(--mu); font-size: 12px; margin-left: 6px; font-weight: 400; }
 .cats li.on { background: var(--pr2); }
 .cats li.on::before { height: 22px; }
 .cats li.on b { color: var(--pr); }
-.car { position: relative; min-height: 336px; overflow: hidden; border-radius: 18px; background: var(--green); box-shadow: var(--shadow-md); isolation: isolate; }
+.car { position: relative; min-height: clamp(336px, 21vw, 470px); overflow: hidden; border-radius: 18px; background: var(--green); box-shadow: var(--shadow-md); isolation: isolate; }
 .sl {
   position: absolute;
   inset: 0;
@@ -410,6 +410,18 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; accent-
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes dialog-in { from { opacity: 0; transform: translateY(16px) scale(.98); } }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
+
+/* 宽屏：容器和面板放大后，内部尺寸同步放大，避免内容显得空旷 */
+@media (min-width: 1440px) {
+  .cats { padding: 12px; }
+  .cats li { min-height: 50px; padding: 9px 15px 9px 18px; }
+  .cats li b { font-size: 15px; }
+  .cats li span { font-size: 12px; }
+  .box { padding: 32px; }
+  .bh h3 { font-size: 23px; }
+  .grid { gap: 24px; }
+  .flash { gap: 18px; }
+}
 
 @media (max-width: 1080px) {
   .hero { grid-template-columns: 190px minmax(0, 1fr) 220px; gap: 12px; }
