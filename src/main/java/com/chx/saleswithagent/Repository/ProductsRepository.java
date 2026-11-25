@@ -44,7 +44,7 @@ public class ProductsRepository {
         e.setOriginalPrice(rs.getFloat("original_price"));
         e.setSales(rs.getInt("sales"));
         e.setStock(rs.getInt("stock"));
-        e.setHue(rs.getInt("hue"));
+
         e.setFlashPrice(rs.getFloat("flash_price"));
         e.setFlashPercent(rs.getInt("flash_percent"));
         var ts1 = rs.getTimestamp("created_at");
@@ -65,13 +65,14 @@ public class ProductsRepository {
                 (rs, i) -> {
                     ProductsVO v = new ProductsVO();
                     v.setId(rs.getInt("id"));
+                    v.setAvatar(rs.getString("avatar"));
                     v.setName(rs.getString("name"));
                     v.setPrice(rs.getBigDecimal("price"));
                     v.setCategory(rs.getString("category"));
                     v.setOriginalPrice(rs.getBigDecimal("original_price"));
                     v.setSales(rs.getInt("sales"));
                     v.setStock(rs.getInt("stock"));
-                    v.setHue(rs.getInt("hue"));
+
                     v.setFlashPrice(rs.getBigDecimal("flash_price"));
                     v.setFlashPercent(rs.getInt("flash_percent"));
                     var ts1 = rs.getTimestamp("created_at");
@@ -121,13 +122,14 @@ public class ProductsRepository {
                 (rs, i) -> {
                     ProductsVO v = new ProductsVO();
                     v.setId(rs.getInt("id"));
+                    v.setAvatar(rs.getString("avatar"));
                     v.setName(rs.getString("name"));
                     v.setPrice(rs.getBigDecimal("price"));
                     v.setCategory(rs.getString("category"));
                     v.setOriginalPrice(rs.getBigDecimal("original_price"));
                     v.setSales(rs.getInt("sales"));
                     v.setStock(rs.getInt("stock"));
-                    v.setHue(rs.getInt("hue"));
+
                     v.setFlashPrice(rs.getBigDecimal("flash_price"));
                     v.setFlashPercent(rs.getInt("flash_percent"));
                     var ts1 = rs.getTimestamp("created_at");
@@ -183,12 +185,12 @@ public class ProductsRepository {
             ProductsVO v = new ProductsVO();
             v.setId(rs.getInt("id"));
             v.setName(rs.getString("name"));
+            v.setAvatar(rs.getString("avatar"));
             v.setPrice(rs.getBigDecimal("price"));
             v.setCategory(rs.getString("category"));
             v.setOriginalPrice(rs.getBigDecimal("original_price"));
             v.setSales(rs.getInt("sales"));
             v.setStock(rs.getInt("stock"));
-            v.setHue(rs.getInt("hue"));
             v.setFlashPrice(rs.getBigDecimal("flash_price"));
             v.setFlashPercent(rs.getInt("flash_percent"));
             var ts1 = rs.getTimestamp("created_at");
@@ -214,6 +216,7 @@ public class ProductsRepository {
             ProductsVO v = new ProductsVO();
             v.setId(rs.getInt("id"));
             v.setName(rs.getString("name"));
+            v.setAvatar(rs.getString("avatar"));
             String specs = rs.getString("specs");
             v.setSpecs(specs == null || specs.isBlank() ? List.of() : List.of(specs));
             v.setPrice(rs.getBigDecimal("price"));
@@ -221,7 +224,6 @@ public class ProductsRepository {
             v.setOriginalPrice(rs.getBigDecimal("original_price"));
             v.setSales(rs.getInt("sales"));
             v.setStock(rs.getInt("stock"));
-            v.setHue(rs.getInt("hue"));
             v.setFlashPrice(rs.getBigDecimal("flash_price"));
             v.setFlashPercent(rs.getInt("flash_percent"));
             var ts1 = rs.getTimestamp("created_at");

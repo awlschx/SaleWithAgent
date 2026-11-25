@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class ProductsVO {
     private Integer id;
+    private String avatar;
     private String name;
     private List<String> specs;
     private String category;

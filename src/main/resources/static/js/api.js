@@ -85,7 +85,7 @@ const API = (() => {
     h: optionalNum(p.hue),
     stock: optionalNum(p.stock),
     status: p.status ?? '',
-    img: p.imageUrl ?? p.image ?? '',
+    img: p.imageUrl ?? p.image ?? p.avatar ?? '',
     freeShipping: !!p.freeShipping,
     nextDay: !!p.nextDay,
     f: optionalNum(p.flashPrice),
