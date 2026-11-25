@@ -158,7 +158,7 @@ const API = (() => {
   const mapOrder = o => ({
     no: o.orderNo ?? o.no,
     t: toMs(o.createdAt ?? o.t),
-    st: o.status ?? o.st ?? '',
+    st: (o.status ?? o.st ?? '').trim(),
     addr: mapAddressSnapshot(o.addressSnapshot ?? o.addr),
     sub: num(o.itemAmount ?? o.sub),
     ship: num(o.shipFee ?? o.ship),
@@ -171,6 +171,7 @@ const API = (() => {
       spec: i.spec ?? '',
       qty: num(i.quantity ?? i.qty),
       price: num(i.price),
+      reviewed: !!i.reviewed,
     })),
   });
   /* 列表响应统一成 { items, total, page, size, serverPaged }
@@ -229,6 +230,10 @@ const API = (() => {
     /* 标记评价有用：服务端返回最新的 {usefulCount, useful} */
     async markReviewUseful(reviewId) {
       return request('/reviews/' + encodeURIComponent(reviewId) + '/useful', { method: 'POST' });
+    },
+    /* 提交评价：评价的对象是「订单项」，所以挂在订单下面 */
+    async createReview(orderNo, payload) {
+      return request('/orders/' + encodeURIComponent(orderNo) + '/reviews', { method: 'POST', body: payload });
     },
 
     async getCart() { return mapCart(await request('/cart')); },

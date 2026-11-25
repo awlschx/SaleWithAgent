@@ -22,6 +22,7 @@
   <footer class="foot">拾光百货 · 商品、订单与账户数据由服务端提供</footer>
   <cart-drawer></cart-drawer>
   <checkout v-if="S.co"></checkout>
+  <review-form v-if="S.rv"></review-form>
   <bottom-nav></bottom-nav>
   <div class="ts" v-if="S.msg">{{ S.msg }}</div>
 </div>
@@ -39,6 +40,7 @@
 <script src="js/components/CartDrawer.js"></script>
 <script src="js/components/AddrForm.js"></script>
 <script src="js/components/Checkout.js"></script>
+<script src="js/components/ReviewForm.js"></script>
 <script src="js/components/AddressPanel.js"></script>
 <script src="js/components/CouponPanel.js"></script>
 <script src="js/components/OrderPanel.js"></script>

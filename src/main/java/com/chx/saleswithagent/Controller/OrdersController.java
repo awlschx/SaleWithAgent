@@ -2,9 +2,11 @@ package com.chx.saleswithagent.Controller;
 
 import com.chx.saleswithagent.Common.UserContext;
 import com.chx.saleswithagent.DTO.OrdersDTO;
+import com.chx.saleswithagent.DTO.ReviewDTO;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.CouponsService;
 import com.chx.saleswithagent.Service.OrdersService;
+import com.chx.saleswithagent.VO.ReviewVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -79,5 +81,13 @@ public class OrdersController {
     @PostMapping("/{orderNo}/receive")
     public Result receiveOrders(@PathVariable String orderNo){
         return Result.ok(ordersService.receiveOrders(orderNo));
+    }
+    /*
+    *进行评论
+     */
+    @PostMapping("/{orderNo}/reviews")
+    public Result<ReviewVO> reviewOrders(@PathVariable String orderNo, @RequestBody ReviewDTO reviewDTO){
+        return Result.ok(ordersService.reviewOrders(orderNo,reviewDTO));
+
     }
 }

@@ -12,4 +12,5 @@ public class OrdersItemsEntity {
     private String spec;
     private Integer quantity;
     private BigDecimal price;
+    private Boolean reviewed;   //当前用户是否已评价过这个订单项
 }

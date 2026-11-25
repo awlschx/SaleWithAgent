@@ -10,4 +10,5 @@ public class OrderItemsVO {
     private String spec;
     private Integer quantity;
     private BigDecimal price;
+    private Boolean reviewed;   //是否已评价，订单列表据此显示「评价 / 已评价」
 }

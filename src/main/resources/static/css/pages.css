@@ -42,6 +42,17 @@
 .rvbar i { position: relative; display: block; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(223,90,52,.14); }
 .rvbar em { position: absolute; top: 0; bottom: 0; left: 0; border-radius: inherit; background: var(--pr); }
 .rvbar span:last-child { text-align: right; }
+/* 写评价 */
+.rvlink { display: inline-block; margin-top: 3px; color: var(--pr); font-size: 12px; }
+.rvlink:hover { text-decoration: underline; }
+.rvlink.off { color: var(--mu); cursor: default; }
+.rvlink.off:hover { text-decoration: none; }
+.starpick { display: flex; gap: 6px; margin: 6px 0 2px; color: rgba(120,110,95,.25); font-size: 28px; line-height: 1; user-select: none; }
+.starpick span { cursor: pointer; transition: color .15s, transform .15s; }
+.starpick span.on { color: var(--gold); }
+.starpick span:hover { transform: scale(1.12); }
+.rvta { width: 100%; min-height: 108px; margin-top: 6px; padding: 11px 13px; border: 1px solid var(--ln); border-radius: 11px; background: var(--card); color: var(--tx); font: inherit; font-size: 13px; line-height: 1.7; resize: vertical; transition: border-color .2s, box-shadow .2s; }
+.rvta:focus { border-color: var(--pr); box-shadow: 0 0 0 3px rgba(223,90,52,.1); }
 @media (max-width: 640px) {
   .sum { flex-wrap: wrap; gap: 14px; }
   .rvdist { width: 100%; max-width: none; margin-left: 0; }

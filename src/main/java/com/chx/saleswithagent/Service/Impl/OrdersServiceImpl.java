@@ -1,6 +1,7 @@
 package com.chx.saleswithagent.Service.Impl;
 
 import com.chx.saleswithagent.DTO.OrdersDTO;
+import com.chx.saleswithagent.DTO.ReviewDTO;
 import com.chx.saleswithagent.Entity.OrdersEntity;
 import com.chx.saleswithagent.Entity.OrdersItemsEntity;
 import com.chx.saleswithagent.Repository.OrdersRepository;
@@ -9,6 +10,7 @@ import com.chx.saleswithagent.Service.OrdersService;
 import com.chx.saleswithagent.VO.OrderItemsVO;
 import com.chx.saleswithagent.VO.OrderPreviewVO;
 import com.chx.saleswithagent.VO.OrdersVO;
+import com.chx.saleswithagent.VO.ReviewVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -84,6 +86,11 @@ public class OrdersServiceImpl implements OrdersService {
     public OrderPreviewVO previewOrders(OrdersDTO ordersDTO, Long userId) {
         log.info("预结算订单");
         return ordersRepository.previewOrders(ordersDTO, userId);
+    }
+
+    @Override
+    public ReviewVO reviewOrders(String orderNo, ReviewDTO reviewDTO) {
+        return ordersRepository.reviewOrders(orderNo,reviewDTO);
     }
 
     @Override
