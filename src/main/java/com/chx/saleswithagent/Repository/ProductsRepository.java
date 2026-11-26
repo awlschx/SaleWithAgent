@@ -217,8 +217,8 @@ public class ProductsRepository {
             v.setId(rs.getInt("id"));
             v.setName(rs.getString("name"));
             v.setAvatar(rs.getString("avatar"));
-            String specs = rs.getString("specs");
-            v.setSpecs(specs == null || specs.isBlank() ? List.of() : List.of(specs));
+            String spec = rs.getString("spec");
+            v.setSpecs(spec == null || spec.isBlank() ? List.of() : List.of(spec));
             v.setPrice(rs.getBigDecimal("price"));
             v.setCategory(rs.getString("category"));
             v.setOriginalPrice(rs.getBigDecimal("original_price"));

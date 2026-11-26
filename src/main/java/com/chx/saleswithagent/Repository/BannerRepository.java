@@ -34,8 +34,8 @@ public class BannerRepository {
            BannerVO bannerVO = new BannerVO();
            bannerVO.setId(rs.getInt("id"));
            bannerVO.setTitle(rs.getString("title"));
+           bannerVO.setImage(rs.getString("image"));
            bannerVO.setDescription(rs.getString("description"));
-           bannerVO.setBgColor(rs.getString("bg_color"));
            bannerVO.setButtonText(rs.getString("button_text"));
            bannerVO.setLinkType(rs.getString("link_type"));
            bannerVO.setLinkTarget(rs.getString("link_target"));

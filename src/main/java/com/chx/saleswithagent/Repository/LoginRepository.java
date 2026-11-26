@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Repository
 @Slf4j
@@ -116,5 +117,25 @@ public class LoginRepository {
     public boolean logout(String token) {
         jwtTokenService.blacklist(token);
         return true;
+    }
+
+    /*
+    *当前登录用户的资料
+    *token里只有userId，昵称和手机号必须回表查，不能信前端缓存
+     */
+    public LoginVO getCurrentUser(long userId) {
+        String sql = "SELECT id, nickname, phone FROM users WHERE id = ?";
+        List<LoginVO> list = jdbc.query(sql, (rs, i) -> {
+            LoginVO lv = new LoginVO();
+            lv.setId(rs.getLong("id"));
+            lv.setNickname(rs.getString("nickname"));
+            lv.setPhone(rs.getString("phone"));
+            return lv;
+        }, userId);
+        //token还没过期但用户已经被删掉，按未登录处理
+        if (list.isEmpty()) {
+            throw new BizException(ErrorCode.COMMON_ERROR, "用户不存在");
+        }
+        return list.get(0);
     }
 }

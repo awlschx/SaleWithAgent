@@ -54,9 +54,9 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
         Claims claims = jwtTokenService.parseClaims(authorization);
         String jti = claims.getId();
         if(jwtTokenService.isBlacklist(jti)){
+            writeErrorResponse(response,"登录已失效");
             return false;
         }
-
 
         //解析token
         try{

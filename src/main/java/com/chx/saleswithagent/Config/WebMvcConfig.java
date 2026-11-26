@@ -25,7 +25,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/auth/refresh",
                         "/api/products",
                         "/api/products/**",
-                        "/api/coupons/available");
+                        "/api/coupons/available",
+                        "/api/support/**");
 
 
     }

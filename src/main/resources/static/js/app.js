@@ -24,6 +24,8 @@ const app = Vue.createApp({
       }
     },
     logout() { return Auth.logout(); },
+    /* 悬停展开由 CSS 负责，这里只决定打开哪个面板 */
+    openHelp(k) { Store.help = k; },
   },
   mounted() {
     document.documentElement.dataset.theme = this.dark ? 'dark' : 'light';
@@ -31,6 +33,7 @@ const app = Vue.createApp({
       if (e.key === 'Escape') {
         if (Store.co && !Store.co.submitting) Store.co = null;
         Store.cartOpen = false;
+        Store.help = null;
       }
     });
   },

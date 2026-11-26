@@ -53,6 +53,14 @@
 .starpick span:hover { transform: scale(1.12); }
 .rvta { width: 100%; min-height: 108px; margin-top: 6px; padding: 11px 13px; border: 1px solid var(--ln); border-radius: 11px; background: var(--card); color: var(--tx); font: inherit; font-size: 13px; line-height: 1.7; resize: vertical; transition: border-color .2s, box-shadow .2s; }
 .rvta:focus { border-color: var(--pr); box-shadow: 0 0 0 3px rgba(223,90,52,.1); }
+/* 帮助中心面板 */
+.hc-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--ln); font-size: 13px; }
+.hc-row > span { flex: none; width: 76px; color: var(--mu); }
+.hc-row > b { font-weight: 600; word-break: break-all; }
+.hc-msg { padding: 12px 0; border-bottom: 1px solid var(--ln); }
+.hc-msg .t { font-size: 13px; font-weight: 600; }
+.hc-msg .sp { margin-top: 4px; line-height: 1.6; }
+.hc-msg.unread .t::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--pr); vertical-align: middle; }
 @media (max-width: 640px) {
   .sum { flex-wrap: wrap; gap: 14px; }
   .rvdist { width: 100%; max-width: none; margin-left: 0; }

@@ -5,6 +5,7 @@ import com.chx.saleswithagent.DTO.LoginDTO;
 import com.chx.saleswithagent.DTO.RegisterDTO;
 import com.chx.saleswithagent.Result.Result;
 import com.chx.saleswithagent.Service.LoginService;
+import com.chx.saleswithagent.VO.LoginVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +42,15 @@ public class LoginController {
     public Result logout(@RequestHeader("Authorization") String authorization){
         log.info("登出功能");
         return Result.ok(loginService.logout(authorization));
+    }
+
+    /*
+    *用token换当前登录用户，页面刷新后靠它恢复登录态
+    *不在拦截器白名单里，所以必须带合法的Authorization头
+     */
+    @GetMapping("/me")
+    public Result<LoginVO> me(){
+        long userId = UserContext.requireUserId();
+        return Result.ok(loginService.getCurrentUser(userId));
     }
 }

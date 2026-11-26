@@ -8,7 +8,7 @@ public class BannerVO {
     private String title;
     private String description;
     private String buttonText;
-    private String bgColor;
     private String linkType;
     private String linkTarget;
+    private String image;
 }

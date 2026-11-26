@@ -35,6 +35,15 @@ Comps.HomeView = {
       if (!n) return;
       this.si = (this.si + d + n) % n;
     },
+    /* 有图就用图（叠一层暗色保证白字可读），没图退回背景色 */
+    bannerStyle(s) {
+      if (!s.img) return { background: s.bg };
+      return {
+        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.42)), url("${s.img}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+    },
     /* 按 linkType 分发：类型决定动作，目标提供参数 */
     openBanner(s) {
       switch (s.lt) {
@@ -72,12 +81,12 @@ Comps.HomeView = {
   <section class="hero">
     <ul class="cats"><li v-for="c in cats" :key="c.n" :class="{on:S.cat===c.n}" @click="pick(c.n)"><b>{{ c.n }}</b><span>{{ c.s }}</span></li></ul>
     <div class="car">
-      <div class="sl" v-for="(s,i) in slides" :key="s.id ?? i" :class="{on:si===i}" :style="{background:s.bg}"><h2>{{ s.t }}</h2><p>{{ s.d }}</p><button @click="openBanner(s)">{{ s.b }}</button></div>
+      <div class="sl" v-for="(s,i) in slides" :key="s.id ?? i" :class="{on:si===i}" :style="bannerStyle(s)"><h2>{{ s.t }}</h2><p>{{ s.d }}</p><button @click="openBanner(s)">{{ s.b }}</button></div>
       <button class="ar l" @click="turn(-1)" aria-label="上一张">&lt;</button><button class="ar r" @click="turn(1)" aria-label="下一张">&gt;</button>
       <div class="dots"><i v-for="(s,i) in slides" :key="i" :class="{on:si===i}" @click="si=i"></i></div>
     </div>
     <div class="hbn" v-if="sideBanners.length">
-      <div class="hb" v-for="s in sideBanners" :key="s.id" :style="{background:s.bg}" @click="openBanner(s)"><b>{{ s.t }}</b><small>{{ s.d }}</small></div>
+      <div class="hb" v-for="s in sideBanners" :key="s.id" :style="bannerStyle(s)" @click="openBanner(s)"><b>{{ s.t }}</b><small>{{ s.d }}</small></div>
     </div>
   </section>
   <section class="box"><div class="bh"><h3>领券中心</h3><small>领取资格、有效期与使用规则由服务端校验</small></div>
@@ -100,6 +109,6 @@ Comps.HomeView = {
     <div class="empty" v-if="S.catalogLoading">正在加载商品…</div>
     <div class="empty" v-else-if="S.catalogError">商品加载失败：{{ S.catalogError }}</div>
     <div class="empty" v-else-if="!shown.length">没有找到相关商品，换个关键词试试，或 <a @click="S.q='';S.cat='全部'">查看全部商品</a></div>
-    <button class="more" v-if="shown.length<S.catalogTotal" :disabled="S.catalogLoading" @click="Catalog.loadMore()">{{ S.catalogLoading ? '加载中…' : '加载更多' }}</button>
+    <button class="more" v-if="S.catalogHasMore" :disabled="S.catalogLoading" @click="Catalog.loadMore()">{{ S.catalogLoading ? '加载中…' : '加载更多' }}</button>
   </section></div>`,
 };

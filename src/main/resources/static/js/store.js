@@ -4,10 +4,10 @@ const Store = Vue.reactive({
   cart: [], cartCount: 0, cartSelectedAmount: 0,
   favs: [], orders: [], addrs: [], coupons: [], couponPool: [], flash: [], banners: [],
   user: null, token: readSessionToken(), authReady: false,
-  catalogTotal: 0, catalogPage: 1, catalogSize: 8, catalogView: [],
+  catalogTotal: 0, catalogPage: 1, catalogSize: 8, catalogView: [], catalogHasMore: false,
   catalogLoading: false, catalogError: '',
   catalogSort: 'def', catalogAsc: true,
-  route: { name: 'home' }, cartOpen: false, co: null, rv: null, msg: '', q: '', cat: '全部',
+  route: { name: 'home' }, cartOpen: false, co: null, rv: null, help: null, msg: '', q: '', cat: '全部',
   pending: { cart: false, coupon: false, address: false, favorite: false },
 });
 
@@ -50,17 +50,20 @@ const Catalog = {
       });
       if (result.serverPaged) {
         applyProducts(append ? [...PRODUCTS, ...result.items] : result.items);
-        Store.catalogView = result.items;
+        /* 加载更多要把新一页接在后面，直接覆盖会导致第一页消失、按钮永远不消失 */
+        Store.catalogView = append ? [...Store.catalogView, ...result.items] : result.items;
         Store.catalogTotal = result.total;
         Store.catalogPage = result.page;
+        Store.catalogHasMore = result.hasMore;
       } else {
         applyProducts(result.items);
         Store.catalogView = this.localView(PRODUCTS);
         Store.catalogTotal = Store.catalogView.length;
         Store.catalogPage = 1;
+        Store.catalogHasMore = false;
       }
     } catch (e) {
-      if (!append) { applyProducts([]); Store.catalogView = []; Store.catalogTotal = 0; }
+      if (!append) { applyProducts([]); Store.catalogView = []; Store.catalogTotal = 0; Store.catalogHasMore = false; }
       Store.catalogError = e.message || '商品加载失败';
     } finally {
       Store.catalogLoading = false;

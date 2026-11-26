@@ -103,6 +103,7 @@ const API = (() => {
     d: b.description ?? '',
     b: b.buttonText ?? '',
     bg: b.bgColor ?? '#ff5000',
+    img: b.image ?? b.imageUrl ?? b.avatar ?? '',
     lt: b.linkType ?? 'CATEGORY',
     lv: b.linkTarget ?? '',
   });
@@ -174,18 +175,18 @@ const API = (() => {
       reviewed: !!i.reviewed,
     })),
   });
-  /* 列表响应统一成 { items, total, page, size, serverPaged }
+  /* 列表响应统一成 { items, total, page, size, hasMore, serverPaged }
      数组 = 后端还没实现分页参数、返回的是完整集合；对象 = 服务端已分页，前端直接信任 */
   const toPage = (data, params, mapper) => {
     const plain = Array.isArray(data);
     const rows = plain ? data : (data?.items || data?.records || data?.list || []);
-    return {
-      items: rows.map(mapper),
-      total: plain ? rows.length : num(data?.total, rows.length),
-      page: plain ? 1 : num(data?.page, params?.page || 1),
-      size: plain ? rows.length : num(data?.size, params?.size || rows.length),
-      serverPaged: !plain,
-    };
+    const total = plain ? rows.length : num(data?.total, rows.length);
+    const page = plain ? 1 : num(data?.page, params?.page || 1);
+    const size = plain ? rows.length : num(data?.size, params?.size || rows.length);
+    /* 后端给了 hasMore 就以它为准，没给才用 page*size 和 total 推算 */
+    const hasMore = plain ? false
+      : (typeof data?.hasMore === 'boolean' ? data.hasMore : page * size < total);
+    return { items: rows.map(mapper), total, page, size, hasMore, serverPaged: !plain };
   };
   const productPage = (data, params) => toPage(data, params, mapProduct);
 
@@ -206,6 +207,15 @@ const API = (() => {
     avg: num(s?.average),
     total: num(s?.total),
     dist: s?.distribution || {},
+  });
+  /* 消息中心 */
+  const mapMessage = m => ({
+    id: m.id,
+    t: m.title ?? '',
+    c: m.content ?? '',
+    ty: m.type ?? '',
+    read: !!m.read,
+    at: toMs(m.createdAt),
   });
 
   return {
@@ -235,6 +245,17 @@ const API = (() => {
     async createReview(orderNo, payload) {
       return request('/orders/' + encodeURIComponent(orderNo) + '/reviews', { method: 'POST', body: payload });
     },
+
+    /* 帮助中心：客服联系方式 */
+    async getSupportContact() { return request('/support/contact'); },
+    /* 消息中心：列表 + 全部已读 */
+    async getMessages(params = {}) {
+      return toPage(await request('/messages' + qs(params)), params, mapMessage);
+    },
+    async readAllMessages() { return request('/messages/read-all', { method: 'POST' }); },
+    /* 举报与意见反馈 */
+    async submitReport(payload) { return request('/reports', { method: 'POST', body: payload }); },
+    async submitFeedback(payload) { return request('/feedback', { method: 'POST', body: payload }); },
 
     async getCart() { return mapCart(await request('/cart')); },
     async addCartItem(item) { return mapCart(await request('/cart/items', { method: 'POST', body: item })); },
