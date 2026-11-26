@@ -9,7 +9,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="home">首页</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><span class="help"><a>收藏夹<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="openFav('goods')">收藏的商品</a><a @click="openFav('shops')">收藏的店铺</a></div></span><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a><span class="help"><a>帮助中心<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="openHelp('service')">官方客服</a><a @click="openHelp('messages')">消息中心</a><a @click="openHelp('report')">举报中心</a><a @click="openHelp('feedback')">意见反馈</a></div></span></span></div></div>
+  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="home">首页</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><span class="help"><a>收藏夹<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="go('#/favorites/goods')">收藏的商品</a><a @click="go('#/favorites/shops')">收藏的店铺</a></div></span><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a><span class="help"><a>帮助中心<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="go('#/support')">官方客服</a><a @click="go('#/messages')">消息中心</a><a @click="openHelp('report')">举报中心</a><a @click="openHelp('feedback')">意见反馈</a></div></span></span></div></div>
   <header class="w hd">
     <div class="logo" role="button" tabindex="0" aria-label="返回首页" @click="home" @keyup.enter="home"><span>拾光<b>百货</b></span><small>SHIGUANG SELECT</small></div>
     <div class="sb">
@@ -19,12 +19,11 @@
     <button class="cartbtn" @click="S.cartOpen=true" aria-label="打开我的购物车"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L20.5 7H6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>我的购物车<i v-if="Cart.count()">{{ Cart.count() }}</i></button>
   </header>
   <component :is="view"></component>
-  <footer class="foot">拾光百货 · 商品、订单与账户数据由服务端提供</footer>
+  <footer v-if="S.route.name !== 'support'" class="foot">拾光百货 · 商品、订单与账户数据由服务端提供</footer>
   <cart-drawer></cart-drawer>
   <checkout v-if="S.co"></checkout>
   <review-form v-if="S.rv"></review-form>
   <help-center v-if="S.help"></help-center>
-  <fav-panel v-if="S.favOpen"></fav-panel>
   <bottom-nav></bottom-nav>
   <div class="ts" v-if="S.msg">{{ S.msg }}</div>
 </div>
@@ -43,13 +42,15 @@
 <script src="js/components/AddrForm.js"></script>
 <script src="js/components/Checkout.js"></script>
 <script src="js/components/ReviewForm.js"></script>
+<script src="js/components/SupportView.js"></script>
 <script src="js/components/HelpCenter.js"></script>
-<script src="js/components/FavPanel.js"></script>
+<script src="js/components/FavoritesView.js"></script>
 <script src="js/components/AddressPanel.js"></script>
 <script src="js/components/CouponPanel.js"></script>
 <script src="js/components/OrderPanel.js"></script>
 <script src="js/components/Me.js"></script>
 <script src="js/components/LoginView.js"></script>
+<script src="js/components/MessagesView.js"></script>
 <script src="js/components/BottomNav.js"></script>
 <script src="js/router.js"></script>
 <script src="js/app.js"></script>

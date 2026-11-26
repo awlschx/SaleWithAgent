@@ -208,15 +208,6 @@ const API = (() => {
     total: num(s?.total),
     dist: s?.distribution || {},
   });
-  /* 消息中心 */
-  const mapMessage = m => ({
-    id: m.id,
-    t: m.title ?? '',
-    c: m.content ?? '',
-    ty: m.type ?? '',
-    read: !!m.read,
-    at: toMs(m.createdAt),
-  });
   /* 店铺：收藏夹里展示用 */
   const mapShop = s => ({
     id: s.id,
@@ -224,6 +215,26 @@ const API = (() => {
     logo: s.logo ?? s.avatar ?? '',
     desc: s.description ?? '',
     goods: num(s.goodsCount),
+  });
+  /* 官方客服：组件只消费统一的视图模型，接口字段与传输细节集中在这里。 */
+  const mapSupportConversation = c => ({
+    id: String(c.id ?? c.conversationId ?? ''),
+    name: c.agentName ?? c.agent?.name ?? '官方客服',
+    role: c.agentRole ?? c.agent?.role ?? '综合咨询',
+    status: String(c.agentStatus ?? c.agent?.status ?? 'OFFLINE').toUpperCase(),
+    avatar: c.agentAvatar ?? c.agent?.avatar ?? '',
+    unread: num(c.unreadCount),
+    updatedAt: toMs(c.updatedAt ?? c.lastMessage?.createdAt),
+    lastMessage: typeof c.lastMessage === 'string' ? c.lastMessage : (c.lastMessage?.content ?? ''),
+  });
+  const mapSupportMessage = m => ({
+    id: String(m.id ?? m.messageId ?? m.clientMessageId ?? ''),
+    clientMessageId: m.clientMessageId ?? '',
+    senderType: String(m.senderType ?? m.sender ?? 'AGENT').toUpperCase(),
+    contentType: m.contentType ?? 'TEXT',
+    content: m.content ?? '',
+    createdAt: toMs(m.createdAt ?? m.sentAt),
+    status: String(m.status ?? 'SENT').toUpperCase(),
   });
 
   return {
@@ -254,13 +265,30 @@ const API = (() => {
       return request('/orders/' + encodeURIComponent(orderNo) + '/reviews', { method: 'POST', body: payload });
     },
 
-    /* 帮助中心：客服联系方式 */
+    /* 帮助中心：客服联系方式（旧弹窗保留）；官方客服聊天使用独立会话接口。 */
     async getSupportContact() { return request('/support/contact'); },
-    /* 消息中心：列表 + 全部已读 */
-    async getMessages(params = {}) {
-      return toPage(await request('/messages' + qs(params)), params, mapMessage);
+    async getSupportConversations() {
+      const data = await request('/support/conversations');
+      const rows = Array.isArray(data) ? data : (data?.items || data?.records || []);
+      return rows.map(mapSupportConversation).filter(item => item.id);
     },
-    async readAllMessages() { return request('/messages/read-all', { method: 'POST' }); },
+    async getSupportMessages(conversationId, params = {}) {
+      const data = await request('/support/conversations/' + encodeURIComponent(conversationId) + '/messages' + qs(params));
+      const rows = Array.isArray(data) ? data : (data?.items || data?.records || []);
+      return {
+        items: rows.map(mapSupportMessage),
+        hasMore: !!data?.hasMore,
+        nextCursor: data?.nextCursor ?? null,
+      };
+    },
+    async sendSupportMessage(conversationId, payload, key) {
+      return mapSupportMessage(await request('/support/conversations/' + encodeURIComponent(conversationId) + '/messages', {
+        method: 'POST', body: payload, headers: { 'Idempotency-Key': key || payload.clientMessageId || idempotencyKey() },
+      }));
+    },
+    async markSupportConversationRead(conversationId, payload) {
+      return request('/support/conversations/' + encodeURIComponent(conversationId) + '/read', { method: 'POST', body: payload });
+    },
     /* 举报与意见反馈 */
     async submitReport(payload) { return request('/reports', { method: 'POST', body: payload }); },
     async submitFeedback(payload) { return request('/feedback', { method: 'POST', body: payload }); },

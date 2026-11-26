@@ -7,7 +7,7 @@ const Store = Vue.reactive({
   catalogTotal: 0, catalogPage: 1, catalogSize: 8, catalogView: [], catalogHasMore: false,
   catalogLoading: false, catalogError: '',
   catalogSort: 'def', catalogAsc: true,
-  route: { name: 'home' }, cartOpen: false, co: null, rv: null, help: null, favOpen: false, favTab: 'goods', msg: '', q: '', cat: '全部',
+  route: { name: 'home' }, cartOpen: false, co: null, rv: null, help: null, msg: '', q: '', cat: '全部',
   pending: { cart: false, coupon: false, address: false, favorite: false },
 });
 

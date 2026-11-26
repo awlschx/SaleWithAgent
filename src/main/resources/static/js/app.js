@@ -1,7 +1,7 @@
 /* 应用入口：注册全局属性与组件，挂载后恢复身份并加载服务端数据。 */
 const app = Vue.createApp({
   data: () => ({ q: '', hots: ['耳机', 'T恤', '保温杯', '咖啡', '跑鞋', '台灯'], dark: matchMedia('(prefers-color-scheme: dark)').matches }),
-  computed: { view() { return { home: 'HomeView', detail: 'Detail', me: 'Me', login: 'LoginView' }[Store.route.name]; } },
+  computed: { view() { return { home: 'HomeView', detail: 'Detail', me: 'Me', login: 'LoginView', support: 'SupportView', messages: 'MessagesView', favorites: 'FavoritesView' }[Store.route.name]; } },
   watch: { dark(v) { document.documentElement.dataset.theme = v ? 'dark' : 'light'; } },
   methods: {
     search() {
@@ -26,12 +26,6 @@ const app = Vue.createApp({
     logout() { return Auth.logout(); },
     /* 悬停展开由 CSS 负责，这里只决定打开哪个面板 */
     openHelp(k) { Store.help = k; },
-    /* 收藏夹：悬停展开两项，点哪项就打开对应的 tab */
-    openFav(k) {
-      if (!Auth.require()) return;
-      Store.favTab = k || 'goods';
-      Store.favOpen = true;
-    },
   },
   mounted() {
     document.documentElement.dataset.theme = this.dark ? 'dark' : 'light';
@@ -40,7 +34,6 @@ const app = Vue.createApp({
         if (Store.co && !Store.co.submitting) Store.co = null;
         Store.cartOpen = false;
         Store.help = null;
-        Store.favOpen = false;
       }
     });
   },

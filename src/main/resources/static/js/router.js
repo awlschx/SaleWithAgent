@@ -8,6 +8,9 @@ const parseRoute = () => {
   let id = rawId;
   try { id = decodeURIComponent(rawId); } catch (e) {}
   Store.route = a === 'login' ? { name: 'login' }
+    : a === 'support' ? { name: 'support' }
+    : a === 'messages' ? { name: 'messages' }
+    : a === 'favorites' ? { name: 'favorites', tab: ['goods', 'shops'].includes(rawId) ? rawId : 'goods' }
     : a === 'item' && id ? { name: 'detail', id }
     : a === 'me' ? { name: 'me', tab: ['orders', 'address', 'coupons'].includes(rawId) ? rawId : 'orders' }
     : { name: 'home' };
