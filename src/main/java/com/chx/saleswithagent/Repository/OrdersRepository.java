@@ -421,4 +421,17 @@ public class OrdersRepository {
         jdbc.update(sql,orderNo);
         return getTrueOrdersVO(orderNo);
     }
+
+    /*
+    *按订单号取订单详情，同时校验归属
+    *不是本人的订单和查不到一样处理，不暴露订单是否存在
+     */
+    public OrdersVO getOrderDetail(String orderNo, Long userId) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE order_no = ? AND user_id = ?";
+        Integer exist = jdbc.queryForObject(sql, Integer.class, orderNo, userId);
+        if (exist == null || exist == 0) {
+            throw new BizException(ErrorCode.COMMON_ERROR, "订单不存在或无权查看");
+        }
+        return getTrueOrdersVO(orderNo);
+    }
 }

@@ -49,4 +49,13 @@ public class AddressController {
     public Result deleteAddressById(@PathVariable Long id){
         return Result.ok(addressService.deleteAddressById(id));
     }
+    /*
+    *设为默认地址，返回设置后的完整列表
+    *
+     */
+    @PutMapping("/{id}/default")
+    public Result setDefaultAddress(@PathVariable Long id){
+        Long userId = UserContext.getUserId();
+        return Result.ok(addressService.setDefault(id,userId));
+    }
 }

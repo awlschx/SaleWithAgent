@@ -80,4 +80,13 @@ public class OrdersController {
     public Result receiveOrders(@PathVariable String orderNo){
         return Result.ok(ordersService.receiveOrders(orderNo));
     }
+
+    /*
+    *订单详情（带明细），只能看自己的订单
+     */
+    @GetMapping("/{orderNo}")
+    public Result orderDetail(@PathVariable String orderNo){
+        Long userId = UserContext.getUserId();
+        return Result.ok(ordersService.getOrderDetail(orderNo,userId));
+    }
 }

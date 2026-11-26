@@ -217,6 +217,14 @@ const API = (() => {
     read: !!m.read,
     at: toMs(m.createdAt),
   });
+  /* 店铺：收藏夹里展示用 */
+  const mapShop = s => ({
+    id: s.id,
+    n: s.name ?? '',
+    logo: s.logo ?? s.avatar ?? '',
+    desc: s.description ?? '',
+    goods: num(s.goodsCount),
+  });
 
   return {
     async getProducts(params = {}) { return productPage(await request('/products' + qs(params)), params); },
@@ -298,6 +306,13 @@ const API = (() => {
     async receiveOrder(orderNo) { return mapOrder(await request('/orders/' + encodeURIComponent(orderNo) + '/receive', { method: 'POST' })); },
 
     async getFavorites() { return ((await request('/favorites')) || []).map(p => p.id ?? p.productId); },
+    /* 收藏夹：商品返回完整对象，不用再按 id 逐个查 */
+    async getFavoriteProducts() { return ((await request('/favorites/products')) || []).map(mapProduct); },
+    async getFavoriteShops() { return ((await request('/favorites/shops')) || []).map(mapShop); },
+    async toggleFavoriteShop(shopId) {
+      const r = await request('/favorites/shops/' + encodeURIComponent(shopId) + '/toggle', { method: 'POST' });
+      return !!(r && (r.favorited ?? r.favorite));
+    },
     async toggleFavorite(productId) {
       const r = await request('/favorites/' + productId + '/toggle', { method: 'POST' });
       return !!(r && (r.favorited ?? r.favorite));

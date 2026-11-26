@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.PreparedStatement;
@@ -88,5 +89,17 @@ public class AddressRepository {
     public int deleteAddressById(Long id) {
         String sql = "DELETE FROM addresses WHERE id = ?";
         return jdbc.update(sql,id);
+    }
+
+    /*
+    *设为默认地址
+    *先把该用户其它地址的默认位清掉，再把这条置1，两步必须在同一个事务里
+     */
+    @Transactional
+    public void setDefault(Long id, Long userId) {
+        String clearSql = "UPDATE addresses SET is_default = 0 WHERE user_id = ?";
+        jdbc.update(clearSql,userId);
+        String setSql = "UPDATE addresses SET is_default = 1 WHERE id = ? AND user_id = ?";
+        jdbc.update(setSql,id,userId);
     }
 }

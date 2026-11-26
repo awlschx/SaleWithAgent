@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -40,5 +41,15 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public ProductsVO getProduct(long id) {
         return productsRepository.getProduct(id);
+    }
+
+    @Override
+    public List<Map<String, Object>> getCategories() {
+        return productsRepository.getCategories();
+    }
+
+    @Override
+    public List<String> getProductSpecs(long id) {
+        return productsRepository.getProductSpecs(id);
     }
 }

@@ -26,6 +26,12 @@ const app = Vue.createApp({
     logout() { return Auth.logout(); },
     /* 悬停展开由 CSS 负责，这里只决定打开哪个面板 */
     openHelp(k) { Store.help = k; },
+    /* 收藏夹：悬停展开两项，点哪项就打开对应的 tab */
+    openFav(k) {
+      if (!Auth.require()) return;
+      Store.favTab = k || 'goods';
+      Store.favOpen = true;
+    },
   },
   mounted() {
     document.documentElement.dataset.theme = this.dark ? 'dark' : 'light';
@@ -34,6 +40,7 @@ const app = Vue.createApp({
         if (Store.co && !Store.co.submitting) Store.co = null;
         Store.cartOpen = false;
         Store.help = null;
+        Store.favOpen = false;
       }
     });
   },

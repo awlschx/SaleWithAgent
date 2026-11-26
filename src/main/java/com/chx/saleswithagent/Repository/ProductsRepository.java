@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -234,5 +235,34 @@ public class ProductsRepository {
             v.setFlashEndAt(ts2 == null ? null : ts2.toLocalDateTime());
             return v;
                 },id);
+    }
+
+    /*
+    *首页分类列表
+    *直接从商品表按分类聚合，不再单独维护一张分类表，加分类只需要加商品
+     */
+    public List<Map<String, Object>> getCategories() {
+        String sql = "SELECT category AS name, COUNT(*) AS total FROM products " +
+                "WHERE category IS NOT NULL AND category <> '' GROUP BY category ORDER BY MIN(id)";
+        return jdbc.query(sql, (rs, i) -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("name", rs.getString("name"));
+            m.put("desc", rs.getLong("total") + " 件商品");
+            return m;
+        });
+    }
+
+    /*
+    *商品的规格选项
+    *现在是单规格模型（规格存在products.spec上），所以最多返回一个
+     */
+    public List<String> getProductSpecs(long id) {
+        String sql = "SELECT spec FROM products WHERE id = ?";
+        List<String> list = jdbc.query(sql, (rs, i) -> rs.getString("spec"), id);
+        if (list.isEmpty()) {
+            return List.of();
+        }
+        String spec = list.get(0);
+        return spec == null || spec.isBlank() ? List.of() : List.of(spec);
     }
 }

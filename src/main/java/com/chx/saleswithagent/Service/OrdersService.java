@@ -18,4 +18,6 @@ public interface OrdersService {
     OrdersVO receiveOrders(String orderNo);
 
     OrderPreviewVO previewOrders(OrdersDTO ordersDTO, Long userId);
+
+    OrdersVO getOrderDetail(String orderNo, Long userId);
 }

@@ -77,4 +77,12 @@ public class AddressServiceImpl implements AddressService {
     public Boolean deleteAddressById(Long id) {
         return addressRepository.deleteAddressById(id) > 0;
     }
+
+    @Override
+    @Transactional
+    public List<AddressVO> setDefault(Long id, Long userId) {
+        addressRepository.setDefault(id,userId);
+        /*前端拿到列表直接覆盖本地状态，省一次查询*/
+        return getAddress(userId);
+    }
 }

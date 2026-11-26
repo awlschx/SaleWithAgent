@@ -9,7 +9,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="home">首页</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a><span class="help"><a>帮助中心<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="openHelp('service')">官方客服</a><a @click="openHelp('messages')">消息中心</a><a @click="openHelp('report')">举报中心</a><a @click="openHelp('feedback')">意见反馈</a></div></span></span></div></div>
+  <div class="top"><div class="w"><span>欢迎来到拾光百货</span><span><a v-if="!S.user" @click="go('#/login')">登录 / 注册</a><a v-else @click="logout">退出（{{ S.user.nickname || S.user.phone }}）</a><a @click="home">首页</a><a @click="Auth.go('#/me/orders')">我的订单</a><a @click="Auth.go('#/me/coupons')">优惠券</a><span class="help"><a>收藏夹<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="openFav('goods')">收藏的商品</a><a @click="openFav('shops')">收藏的店铺</a></div></span><a @click="Auth.go('#/me/address')">收货地址</a><a @click="dark=!dark">{{ dark ? '浅色模式' : '深色模式' }}</a><span class="help"><a>帮助中心<svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4 L6 8 L10 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="hdn"><a @click="openHelp('service')">官方客服</a><a @click="openHelp('messages')">消息中心</a><a @click="openHelp('report')">举报中心</a><a @click="openHelp('feedback')">意见反馈</a></div></span></span></div></div>
   <header class="w hd">
     <div class="logo" role="button" tabindex="0" aria-label="返回首页" @click="home" @keyup.enter="home"><span>拾光<b>百货</b></span><small>SHIGUANG SELECT</small></div>
     <div class="sb">
@@ -24,6 +24,7 @@
   <checkout v-if="S.co"></checkout>
   <review-form v-if="S.rv"></review-form>
   <help-center v-if="S.help"></help-center>
+  <fav-panel v-if="S.favOpen"></fav-panel>
   <bottom-nav></bottom-nav>
   <div class="ts" v-if="S.msg">{{ S.msg }}</div>
 </div>
@@ -43,6 +44,7 @@
 <script src="js/components/Checkout.js"></script>
 <script src="js/components/ReviewForm.js"></script>
 <script src="js/components/HelpCenter.js"></script>
+<script src="js/components/FavPanel.js"></script>
 <script src="js/components/AddressPanel.js"></script>
 <script src="js/components/CouponPanel.js"></script>
 <script src="js/components/OrderPanel.js"></script>

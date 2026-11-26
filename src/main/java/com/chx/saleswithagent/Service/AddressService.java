@@ -15,4 +15,6 @@ public interface AddressService {
     AddressVO updateAddress(Long id, AddressDTO addressDTO);
 
     Boolean deleteAddressById(Long id);
+
+    List<AddressVO> setDefault(Long id, Long userId);
 }

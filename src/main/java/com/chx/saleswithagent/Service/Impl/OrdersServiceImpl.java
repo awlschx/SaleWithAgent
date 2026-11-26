@@ -92,4 +92,10 @@ public class OrdersServiceImpl implements OrdersService {
         log.info("确认收货");
         return ordersRepository.receiveOrders(orderNo);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrdersVO getOrderDetail(String orderNo, Long userId) {
+        return ordersRepository.getOrderDetail(orderNo, userId);
+    }
 }

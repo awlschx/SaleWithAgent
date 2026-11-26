@@ -55,5 +55,12 @@ public class ProductsController {
     public Result<ProductsVO> getProduct(@PathVariable long id){
         return Result.ok(productsService.getProduct(id));
     }
+    /*
+    *获取商品的规格选项
+     */
+    @GetMapping("/{id}/specs")
+    public Result<List<String>> getProductSpecs(@PathVariable long id){
+        return Result.ok(productsService.getProductSpecs(id));
+    }
 
 }
