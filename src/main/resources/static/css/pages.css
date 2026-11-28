@@ -570,3 +570,43 @@
   .support-composer-foot > span { display: none; }
   .support-send { min-width: 86px; }
 }
+
+/* 消息中心：左 3 右 7 双栏 */
+.mc-wrap { display: grid; grid-template-columns: 3fr 7fr; gap: 18px; height: clamp(420px, calc(100vh - 230px), 720px); max-width: 1180px; margin: 0 auto; }
+.mc-col { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border: 1px solid var(--ln); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-sm); }
+.mc-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 18px; border-bottom: 1px solid var(--ln); }
+.mc-hd h3 { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 650; }
+.mc-hd small { color: var(--mu); font-size: 11px; }
+.mc-tag { padding: 1px 7px; border-radius: 6px; background: var(--surface); color: var(--mu); font-size: 10px; font-style: normal; font-weight: 400; }
+
+/* 左：发消息的人 */
+.mc-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; }
+.mc-thread { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 12px; border-radius: 11px; cursor: pointer; transition: background .2s, box-shadow .2s; }
+.mc-thread:hover { background: var(--surface); }
+.mc-thread.on { background: var(--surface); box-shadow: inset 3px 0 0 rgba(223,90,52,.42); }
+.mc-av { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--ln); border-radius: 12px; background: var(--surface); color: var(--mu); font-size: 14px; font-weight: 700; }
+.mc-thread-main { display: grid; gap: 5px; min-width: 0; }
+.mc-thread-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mc-thread-top b { overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.mc-thread-top i { flex: none; color: var(--mu); font-size: 10px; font-style: normal; }
+.mc-thread-last { overflow: hidden; color: var(--mu); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.mc-badge { align-self: start; min-width: 18px; padding: 1px 5px; border-radius: 9px; background: var(--pr); color: #fff; font-size: 10px; font-style: normal; text-align: center; }
+
+/* 右：消息内容 */
+.mc-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.mc-msg { padding: 13px 15px; border: 1px solid var(--ln); border-radius: 12px; background: var(--card); cursor: pointer; transition: border-color .2s, background .2s; }
+.mc-msg:hover { border-color: rgba(223,90,52,.32); }
+.mc-msg.unread { background: var(--pr2); border-color: rgba(223,90,52,.18); }
+.mc-msg-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.mc-msg-top b { font-size: 13px; font-weight: 650; }
+.mc-msg-top i { color: var(--mu); font-size: 10px; font-style: normal; }
+.mc-msg-text { color: var(--tx); font-size: 12.5px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+.mc-empty { align-items: center; justify-content: center; color: var(--mu); text-align: center; }
+.mc-empty p { font-size: 14px; }
+.mc-empty span { font-size: 12px; opacity: .8; }
+
+@media (max-width: 860px) {
+  .mc-wrap { grid-template-columns: 1fr; height: auto; }
+  .mc-col:first-child { height: 300px; }
+  .mc-col:last-child { height: 460px; }
+}

@@ -216,6 +216,26 @@ const API = (() => {
     desc: s.description ?? '',
     goods: num(s.goodsCount),
   });
+  /* 消息中心：发消息人（左侧列表） */
+  const mapMessageThread = t => ({
+    id: String(t.id ?? t.conversationId ?? ''),
+    name: t.name ?? t.senderName ?? '系统消息',
+    type: String(t.type ?? 'SYSTEM').toUpperCase(),
+    avatar: t.avatar ?? '',
+    unread: num(t.unreadCount ?? t.unread),
+    updatedAt: toMs(t.updatedAt ?? t.lastMessageAt),
+    lastMessage: typeof t.lastMessage === 'string' ? t.lastMessage : (t.lastMessage?.content ?? ''),
+  });
+  /* 消息中心：发消息人发来的具体消息（右侧列表） */
+  const mapMessage = m => ({
+    id: String(m.id ?? m.messageId ?? ''),
+    title: m.title ?? '',
+    content: m.content ?? '',
+    read: !!m.read,
+    at: toMs(m.createdAt ?? m.at),
+    linkType: m.linkType ?? '',
+    linkTarget: m.linkTarget ?? '',
+  });
   /* 官方客服：组件只消费统一的视图模型，接口字段与传输细节集中在这里。 */
   const mapSupportConversation = c => ({
     id: String(c.id ?? c.conversationId ?? ''),
@@ -289,6 +309,28 @@ const API = (() => {
     async markSupportConversationRead(conversationId, payload) {
       return request('/support/conversations/' + encodeURIComponent(conversationId) + '/read', { method: 'POST', body: payload });
     },
+
+    /* 消息中心：左侧发消息人列表 */
+    async getMessageThreads(params = {}) {
+      const data = await request('/messages/conversations' + qs(params));
+      const rows = Array.isArray(data) ? data : (data?.items || data?.records || []);
+      return {
+        items: rows.map(mapMessageThread).filter(item => item.id),
+        hasMore: !!data?.hasMore,
+      };
+    },
+    /* 消息中心：右侧该发消息人的消息 */
+    async getThreadMessages(threadId, params = {}) {
+      const data = await request('/messages/conversations/' + encodeURIComponent(threadId) + '/messages' + qs(params));
+      const rows = Array.isArray(data) ? data : (data?.items || data?.records || []);
+      return {
+        items: rows.map(mapMessage),
+        hasMore: !!data?.hasMore,
+      };
+    },
+    async markMessageRead(id) { return request('/messages/' + encodeURIComponent(id) + '/read', { method: 'POST' }); },
+    async markThreadRead(threadId) { return request('/messages/conversations/' + encodeURIComponent(threadId) + '/read', { method: 'POST' }); },
+    async getUnreadCount() { return request('/messages/unread-count'); },
     /* 举报与意见反馈 */
     async submitReport(payload) { return request('/reports', { method: 'POST', body: payload }); },
     async submitFeedback(payload) { return request('/feedback', { method: 'POST', body: payload }); },
