@@ -29,7 +29,6 @@
     <properties>
         <java.version>21</java.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -41,7 +40,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
